@@ -127,7 +127,7 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
     <div class="kpi blue"><div class="klbl">Current Headcount</div><div class="kval" id="k0hc">508</div><div class="ksub" id="k0hcsub">485 FTE · 23 Virtual Exec</div></div>
     <div class="kpi indigo"><div class="klbl">Total Hiring Demand 2026</div><div class="kval" id="k0demand">—</div><div class="ksub">H2 requests + H1 carry forward</div></div>
     <div class="kpi green"><div class="klbl">Projected Headcount</div><div class="kval" id="k0proj">—</div><div class="ksub"><span class="hi" id="k0net">—</span> total new positions</div></div>
-    <div class="kpi amber"><div class="klbl">HC Growth</div><div class="kval" id="k0gr">—</div><div class="ksub">vs. current HC</div></div>
+    <div class="kpi amber"><div class="klbl">HC Growth</div><div class="kval" id="k0gr">—</div><div class="ksub">H2 requests + H1 carry forward</div></div>
     <div class="kpi teal"><div class="klbl">H1 Carry Forward</div><div class="kval" id="k0sp">49</div><div class="ksub">Open vacancies from H1</div></div>
     <div class="kpi purple"><div class="klbl">H2 Hiring Requests</div><div class="kval" id="k0h2">68</div><div class="ksub">All <span class="bl">Submitted</span></div></div>
   </div>
@@ -376,7 +376,7 @@ function render(){
   const spTot=spill.reduce((a,x)=>a+x.roles,0);
   const demand=h2Total;
   const proj=hcTotal+h2Total;
-  const growth=hcTotal>0?((demand/hcTotal)*100).toFixed(1):0;
+  const growth=hcTotal>0?(((h2Total+spTot)/hcTotal)*100).toFixed(1):0;
   const crit=h2.filter(r=>r.priority==='Critical').reduce((a,r)=>a+r.positions,0);
   const high=h2.filter(r=>r.priority==='High').reduce((a,r)=>a+r.positions,0);
   const med=h2.filter(r=>r.priority==='Medium').reduce((a,r)=>a+r.positions,0);

@@ -295,10 +295,41 @@ const levelOrder=allLevels.map(([c])=>c);
 // ── MSD (Multi-Select Dropdown) ENGINE ──
 const MSD = {}; // id → Set of selected values
 
+function addSelectAllRow(id, optsEl){
+  const key=id.replace('msd-','');
+  const div=document.createElement('div');
+  div.className='msd-opt msd-select-all';
+  div.style.cssText='border-bottom:1px solid #1a2235;margin-bottom:3px;padding-bottom:6px;';
+  div.innerHTML=`<input type="checkbox" id="sa-${key}"><span style="color:#7a9af7;font-weight:600">Select All</span>`;
+  const cb=div.querySelector('input');
+  cb.addEventListener('change',e=>{
+    e.stopPropagation();
+    const allOpts=optsEl.querySelectorAll('.msd-opt:not(.msd-select-all)');
+    allOpts.forEach(opt=>{
+      const oval=opt.dataset.val;
+      const ocb=opt.querySelector('input');
+      if(e.target.checked){ocb.checked=true;opt.classList.add('selected');MSD[id].add(oval);}
+      else{ocb.checked=false;opt.classList.remove('selected');MSD[id].delete(oval);}
+    });
+    updateMSDBadge(id);
+    onFilterChange(id);
+  });
+  div.addEventListener('click',e=>{if(e.target.tagName!=='INPUT') cb.click();});
+  optsEl.appendChild(div);
+}
+
+function syncSelectAll(id, optsEl){
+  const cb=optsEl.querySelector('.msd-select-all input');
+  if(!cb) return;
+  const allOpts=optsEl.querySelectorAll('.msd-opt:not(.msd-select-all)');
+  cb.checked=allOpts.length>0&&[...allOpts].every(o=>o.classList.contains('selected'));
+}
+
 function initMSD(id, items, labelFn){
   MSD[id] = new Set();
   const opts = document.getElementById('opts-'+id.replace('msd-',''));
   opts.innerHTML='';
+  addSelectAllRow(id, opts);
   items.forEach(item=>{
     const val=typeof item==='string'?item:item[0];
     const lbl=labelFn?labelFn(item):(typeof item==='string'?item:item[1]);
@@ -312,6 +343,7 @@ function initMSD(id, items, labelFn){
       if(e.target.checked){MSD[id].add(val);div.classList.add('selected');}
       else{MSD[id].delete(val);div.classList.remove('selected');}
       updateMSDBadge(id);
+      syncSelectAll(id, opts);
       onFilterChange(id);
     });
     div.addEventListener('click',e=>{ if(e.target.tagName!=='INPUT') div.querySelector('input').click(); });
@@ -351,7 +383,8 @@ function closeMSD(id){
 }
 function clearMSD(id){
   MSD[id].clear();
-  document.querySelectorAll(`#opts-${id.replace('msd-','')} input`).forEach(i=>{i.checked=false;i.closest('.msd-opt').classList.remove('selected');});
+  const key=id.replace('msd-','');
+  document.querySelectorAll(`#opts-${key} input`).forEach(i=>{i.checked=false;i.closest('.msd-opt').classList.remove('selected');});
   updateMSDBadge(id);
   onFilterChange(id);
 }
@@ -407,6 +440,7 @@ function refreshWings(){
   optsEl.innerHTML='';
   const prevSel=new Set(MSD['msd-wing']);
   MSD['msd-wing']=new Set([...prevSel].filter(v=>wings.includes(v)));
+  addSelectAllRow('msd-wing', optsEl);
   wings.forEach(w=>{
     const div=document.createElement('div');
     div.className='msd-opt'+(MSD['msd-wing'].has(w)?' selected':'');
@@ -417,11 +451,13 @@ function refreshWings(){
       if(e.target.checked){MSD['msd-wing'].add(w);div.classList.add('selected');}
       else{MSD['msd-wing'].delete(w);div.classList.remove('selected');}
       updateMSDBadge('msd-wing');
+      syncSelectAll('msd-wing', optsEl);
       onFilterChange('msd-wing');
     });
     div.addEventListener('click',e=>{if(e.target.tagName!=='INPUT') div.querySelector('input').click();});
     optsEl.appendChild(div);
   });
+  syncSelectAll('msd-wing', optsEl);
   updateMSDBadge('msd-wing');
 }
 
@@ -436,6 +472,7 @@ function refreshLevels(){
   optsEl.innerHTML='';
   const prevSel=new Set(MSD['msd-level']||[]);
   MSD['msd-level']=MSD['msd-level']?new Set([...prevSel].filter(v=>available.has(v))):new Set();
+  addSelectAllRow('msd-level', optsEl);
   allLevels.filter(([c])=>available.has(c)).forEach(([code,label])=>{
     const div=document.createElement('div');
     div.className='msd-opt'+(MSD['msd-level'].has(code)?' selected':'');
@@ -446,11 +483,13 @@ function refreshLevels(){
       if(e.target.checked){MSD['msd-level'].add(code);div.classList.add('selected');}
       else{MSD['msd-level'].delete(code);div.classList.remove('selected');}
       updateMSDBadge('msd-level');
+      syncSelectAll('msd-level', optsEl);
       onFilterChange('msd-level');
     });
     div.addEventListener('click',e=>{if(e.target.tagName!=='INPUT') div.querySelector('input').click();});
     optsEl.appendChild(div);
   });
+  syncSelectAll('msd-level', optsEl);
   updateMSDBadge('msd-level');
 }
 

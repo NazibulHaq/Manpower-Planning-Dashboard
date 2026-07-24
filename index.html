@@ -300,7 +300,7 @@ const charts={};
 // All unique depts from H2 requests (normalized)
 const allH2Depts = [...new Set(RAW.h2_requests.map(r=>r.dept))].sort();
 // All unique depts from HC
-const allHCDepts = [...new Set(RAW.employees.map(e=>e.dept))].sort();
+const allHCDepts = [...new Set(RAW.employees.map(e=>e.dept))].filter(d=>d!=='Vice President').sort();
 // All depts combined
 const allDepts = [...new Set([...allH2Depts,...allHCDepts])].sort();
 const allCtrs  = [...new Set(RAW.employees.map(e=>e.country))].sort();

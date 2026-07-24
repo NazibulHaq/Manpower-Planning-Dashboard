@@ -127,7 +127,7 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
     <div class="kpi blue"><div class="klbl">Current Headcount</div><div class="kval" id="k0hc">508</div><div class="ksub" id="k0hcsub">485 FTE · 23 Virtual Exec</div></div>
     <div class="kpi indigo"><div class="klbl">Total Hiring Demand 2026</div><div class="kval" id="k0demand">—</div><div class="ksub">H2 requests + H1 carry forward</div></div>
     <div class="kpi green"><div class="klbl">Projected Headcount</div><div class="kval" id="k0proj">—</div><div class="ksub"><span class="hi" id="k0net">—</span> total new positions</div></div>
-    <div class="kpi amber"><div class="klbl">HC Growth</div><div class="kval" id="k0gr">—</div><div class="ksub">H2 requests + H1 carry forward</div></div>
+    <div class="kpi amber"><div class="klbl">HC Growth</div><div class="kval" id="k0gr">—</div><div class="ksub">vs. current HC</div></div>
     <div class="kpi teal"><div class="klbl">H1 Carry Forward</div><div class="kval" id="k0sp">49</div><div class="ksub">Open vacancies from H1</div></div>
     <div class="kpi purple"><div class="klbl">H2 Hiring Requests</div><div class="kval" id="k0h2">68</div><div class="ksub">All <span class="bl">Submitted</span></div></div>
   </div>
@@ -197,7 +197,7 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
       <div class="chard">Department Summary <small>sorted by HC</small></div>
       <div class="tw">
         <table>
-          <thead><tr><th>Department</th><th>HC</th><th>H2 Req</th><th>Proj.</th><th>Growth</th></tr></thead>
+          <thead><tr><th>Department</th><th>HC</th><th>H2 Req</th><th>H1 C/F</th><th>Proj.</th><th>Growth</th></tr></thead>
           <tbody id="t3dept"></tbody>
         </table>
       </div>
@@ -374,9 +374,9 @@ function render(){
   const hcTotal=emps.length;
   const h2Total=h2.reduce((a,r)=>a+r.positions,0);
   const spTot=spill.reduce((a,x)=>a+x.roles,0);
-  const demand=h2Total;
-  const proj=hcTotal+h2Total;
-  const growth=hcTotal>0?(((h2Total+spTot)/hcTotal)*100).toFixed(1):0;
+  const demand=h2Total+spTot;
+  const proj=hcTotal+demand;
+  const growth=hcTotal>0?((demand/hcTotal)*100).toFixed(1):0;
   const crit=h2.filter(r=>r.priority==='Critical').reduce((a,r)=>a+r.positions,0);
   const high=h2.filter(r=>r.priority==='High').reduce((a,r)=>a+r.positions,0);
   const med=h2.filter(r=>r.priority==='Medium').reduce((a,r)=>a+r.positions,0);
@@ -475,23 +475,30 @@ function render(){
 
   // ── PAGE 3: DEPT BREAKDOWN ──
   const h2DMap=sum(h2,'dept','positions');
-  const allD=[...new Set([...Object.keys(hcByDept),...Object.keys(h2DMap)])].sort((a,b)=>(hcByDept[b]||0)-(hcByDept[a]||0)).slice(0,20);
+  const spDMap=sum(spill,'dept','roles');
+  const allD=[...new Set([...Object.keys(hcByDept),...Object.keys(h2DMap),...Object.keys(spDMap)])].sort((a,b)=>(hcByDept[b]||0)-(hcByDept[a]||0)).slice(0,20);
   mk('c3comp','bar',{
     labels:allD.map(d=>sh(d,18)),
     datasets:[
-      {label:'Current HC',data:allD.map(d=>hcByDept[d]||0),backgroundColor:'rgba(76,110,245,.75)',borderRadius:3,borderSkipped:false},
-      {label:'H2 Requests',data:allD.map(d=>h2DMap[d]||0),backgroundColor:'rgba(124,58,237,.75)',borderRadius:3,borderSkipped:false},
+      {label:'Current HC',  data:allD.map(d=>hcByDept[d]||0), backgroundColor:'rgba(76,110,245,.75)', borderRadius:3,borderSkipped:false},
+      {label:'H2 Requests', data:allD.map(d=>h2DMap[d]||0),   backgroundColor:'rgba(124,58,237,.75)', borderRadius:3,borderSkipped:false},
+      {label:'H1 Carry Fwd',data:allD.map(d=>spDMap[d]||0),   backgroundColor:'rgba(6,182,212,.65)',  borderRadius:3,borderSkipped:false},
     ]
   },{plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:12,color:'#6b7a99',font:{size:10}}}},scales:{x:nG,y:{...yG,beginAtZero:true}},maintainAspectRatio:false});
   const t3=document.getElementById('t3dept');
   t3.innerHTML='';
   allD.forEach(dept=>{
-    const cur=hcByDept[dept]||0,req=h2DMap[dept]||0,pr=cur+req;
-    const gr=cur>0?Math.round(req/cur*100):0;
+    const cur=hcByDept[dept]||0, req=h2DMap[dept]||0, cf=spDMap[dept]||0;
+    const pr=cur+req+cf;
+    const gr=cur>0?Math.round(((req+cf)/cur)*100):0;
+    const grCls=gr===0?'':'gr>=20?\'a\':\'g\'';
     t3.innerHTML+=`<tr>
-      <td style="color:#9aa5bf">${sh(dept,26)}</td>
-      <td>${cur}</td><td>${req||'—'}</td><td>${pr}</td>
-      <td>${req>0?`<span class="pill ${gr>=20?'a':'g'}">+${gr}%</span>`:'—'}</td>
+      <td style="color:#9aa5bf">${sh(dept,24)}</td>
+      <td>${cur}</td>
+      <td>${req||'—'}</td>
+      <td>${cf||'—'}</td>
+      <td>${pr}</td>
+      <td>${(req+cf)>0?`<span class="pill ${gr>=20?'a':'g'}">+${gr}%</span>`:'—'}</td>
     </tr>`;
   });
 

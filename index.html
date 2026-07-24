@@ -313,9 +313,13 @@ allHCDepts.forEach(d=>{
   hcWingsByDept[d]=[...new Set(RAW.employees.filter(e=>e.dept===d).map(e=>e.wing))].filter(w=>w&&w!=='—').sort();
 });
 
-// All level options — declared here so populateLevels can reference it on init
-const allLevels=['IC1 - Executive','IC2 - Senior Executive','IC3 - Specialist','IC4 - Expert','IC5 - Principal',
-  'M3 - Lead/ Manager I','M4 - Manager II','M5 - Associate Director','M6 - Director','M7 - Vice President'];
+// All level options [short_code, full_label] — value=short_code so it matches h2.level_short and spill.level
+const allLevels=[
+  ['IC1','IC1 — Executive'],['IC2','IC2 — Senior Executive'],['IC3','IC3 — Specialist'],
+  ['IC4','IC4 — Expert'],['IC5','IC5 — Principal'],['M3','M3 — Lead / Manager I'],
+  ['M4','M4 — Manager II'],['M5','M5 — Associate Director'],['M6','M6 — Director'],
+  ['M7','M7 — Vice President'],['M10','M10 — (undecided)'],
+];
 
 // Populate dept select
 const deptSel=document.getElementById('f-dept');
@@ -353,16 +357,22 @@ function populateLevels(dept, wing){
   const s=document.getElementById('f-level');
   const cur=s.value;
   s.innerHTML='<option value="">All Levels</option>';
-  // Filter available levels based on current dept+wing selection
-  const available=[...new Set(RAW.h2_requests
+  // Collect short codes available in H2 requests for this dept/wing
+  const h2Avail=new Set(RAW.h2_requests
     .filter(r=>(!dept||r.dept===dept)&&(!wing||r.wing===wing))
-    .map(r=>r.level)
-  )];
-  // Show in logical order, only those that exist in filtered set
-  allLevels.filter(l=>available.includes(l)).forEach(l=>{
-    const o=document.createElement('option');o.value=l;o.textContent=l;s.appendChild(o);
+    .map(r=>r.level_short)
+  );
+  // Also include short codes from spillover
+  const spAvail=new Set(RAW.spillovers
+    .filter(r=>(!dept||r.dept===dept))
+    .map(r=>r.level).filter(Boolean)
+  );
+  const available=new Set([...h2Avail,...spAvail]);
+  // Show in logical order — value=short code, text=full label
+  allLevels.filter(([code])=>available.has(code)).forEach(([code,label])=>{
+    const o=document.createElement('option');o.value=code;o.textContent=label;s.appendChild(o);
   });
-  if(cur&&available.includes(cur)) s.value=cur; else s.value='';
+  if(cur&&available.has(cur)) s.value=cur; else s.value='';
 }
 
 function onBU(){
@@ -401,7 +411,7 @@ function filtered(){
     (!fi.bu||r.bu===fi.bu)&&
     (!fi.dept||r.dept===fi.dept)&&
     (!fi.wing||r.wing===fi.wing)&&
-    (!fi.level||r.level===fi.level)&&
+    (!fi.level||r.level_short===fi.level)&&
     (!fi.country||r.country===fi.country)
   );
   const spill=RAW.spillovers.filter(s=>

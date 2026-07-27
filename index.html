@@ -129,7 +129,7 @@ html,body{height:100%;background:#080c14;color:#dde1ed;font-family:'Inter',syste
 /* ═══════════════════════════════════════════
    GRID LAYOUTS
 ═══════════════════════════════════════════ */
-.row{display:grid;gap:12px;margin-bottom:12px;align-items:start;}
+.row{display:grid;gap:12px;margin-bottom:12px;align-items:stretch;}
 .row:last-child{margin-bottom:0;}
 .col-1{grid-template-columns:1fr;}
 .col-2{grid-template-columns:1fr 1fr;}
@@ -160,13 +160,29 @@ html,body{height:100%;background:#080c14;color:#dde1ed;font-family:'Inter',syste
 .ch{position:relative;width:100%;display:block;}
 .ch-180{height:180px;}.ch-200{height:200px;}.ch-220{height:220px;}.ch-240{height:240px;}.ch-260{height:260px;}
 .ch-280{height:280px;}.ch-300{height:300px;}.ch-340{height:340px;}.ch-380{height:380px;}
-.ch-420{height:420px;}
+.ch-420{height:420px;}.ch-500{height:500px;}.ch-600{height:600px;}.ch-700{height:700px;}.ch-800{height:800px;}
 .ch canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important;}
+
+/* Scrollable chart container — card clips at fixed height, inner canvas is full natural height */
+.ch-scroll{
+  overflow-y:auto;
+  overflow-x:hidden;
+  border-radius:6px;
+  flex:1;
+  min-height:0;
+}
+.ch-scroll::-webkit-scrollbar{width:4px;}
+.ch-scroll::-webkit-scrollbar-thumb{background:#1e2a3f;border-radius:4px;}
+.ch-scroll::-webkit-scrollbar-track{background:transparent;}
+.ch-scroll .ch{
+  /* inner ch height is set by inline style — tall enough for all bars */
+  width:100%;
+}
 
 /* ═══════════════════════════════════════════
    TABLE (internal scroll)
 ═══════════════════════════════════════════ */
-.tw{overflow-y:auto;}
+.tw{overflow-y:auto;flex:1;min-height:0;}
 .tw::-webkit-scrollbar{width:4px;}
 .tw::-webkit-scrollbar-thumb{background:#1e2a3f;border-radius:4px;}
 table{width:100%;border-collapse:collapse;font-size:11px;}
@@ -445,7 +461,7 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
   </div>
 
   <div class="sec">
-    <div class="row col-23" style="align-items:start;">
+    <div class="row col-23" style="align-items:stretch;">
       <div class="card">
         <div class="chard">Carry Forward — Role Detail</div>
         <div class="tw" style="max-height:420px;">
@@ -533,7 +549,7 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
 <div class="page" id="p4">
 
   <!-- ROW 1: H2 Role table (left) | H2 Requests by Wing chart (right) -->
-  <div class="row col-2" style="align-items:start;margin-bottom:12px;">
+  <div class="row col-2" style="align-items:stretch;margin-bottom:12px;">
 
     <div class="card">
       <div class="chard">H2 Request Breakdown — by Role &amp; Wing</div>
@@ -555,14 +571,16 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
     </div>
 
     <div class="card">
-      <div class="chard">H2 Requests by Wing</div>
-      <div class="ch ch-380"><canvas id="c4wing"></canvas></div>
+      <div class="chard">H2 Requests by Wing <small>scroll to see all</small></div>
+      <div class="ch-scroll" style="max-height:420px;">
+        <div class="ch" style="height:860px;"><canvas id="c4wing"></canvas></div>
+      </div>
     </div>
 
   </div>
 
   <!-- ROW 2: H1 Carry Forward table (left) | Level by Wing chart (right) -->
-  <div class="row col-2" style="align-items:start;margin-bottom:12px;">
+  <div class="row col-2" style="align-items:stretch;margin-bottom:12px;">
 
     <div class="card">
       <div class="chard">H1 Carry Forward — by Role &amp; Level</div>
@@ -582,14 +600,16 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
     </div>
 
     <div class="card">
-      <div class="chard">Level by Wing <small>top 6 · horizontal stacked</small></div>
-      <div class="ch ch-380"><canvas id="c4winglvl"></canvas></div>
+      <div class="chard">Level by Wing <small>all wings · scroll to see all</small></div>
+      <div class="ch-scroll" style="max-height:420px;">
+        <div class="ch" style="height:860px;"><canvas id="c4winglvl"></canvas></div>
+      </div>
     </div>
 
   </div>
 
   <!-- ROW 3: Business Driver Split (left) | Country by Wing (right) -->
-  <div class="row col-2" style="align-items:start;margin-bottom:0;">
+  <div class="row col-2" style="align-items:stretch;margin-bottom:0;">
 
     <div class="card">
       <div class="chard">Business Driver Split</div>
@@ -597,8 +617,10 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
     </div>
 
     <div class="card">
-      <div class="chard">Country by Wing <small>top 6 · horizontal stacked</small></div>
-      <div class="ch ch-300"><canvas id="c4wingctr"></canvas></div>
+      <div class="chard">Country by Wing <small>all wings · scroll to see all</small></div>
+      <div class="ch-scroll" style="max-height:420px;">
+        <div class="ch" style="height:860px;"><canvas id="c4wingctr"></canvas></div>
+      </div>
     </div>
 
   </div>
@@ -1068,7 +1090,7 @@ function render(){
   const t4sp=document.getElementById('t4spill');
   t4sp.innerHTML=spill.length?spill.map(r=>`<tr><td style="color:#9aa5bf">${sh(r.dept,20)}</td><td>${sh(r.role_name,28)}</td><td><span class="pill p">${r.level||'—'}</span></td><td>${r.country}</td><td>${r.bu}</td><td>${statusPill(r.status)}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:#4d5a78">No carry forward matches filters</td></tr>';
   const wingE=Object.entries(sm(h2,'wing','positions')).sort((a,b)=>b[1]-a[1]);
-  mk('c4wing','bar',{labels:wingE.map(([w])=>sh(w,18)),datasets:[{data:wingE.map(([,v])=>v),backgroundColor:wingE.map((_,i)=>P[i%P.length]+'cc'),borderRadius:3,borderSkipped:false}]},{indexAxis:'y',scales:{x:{...xG,beginAtZero:true},y:nG},maintainAspectRatio:false});
+  mk('c4wing','bar',{labels:wingE.map(([w])=>sh(w,22)),datasets:[{data:wingE.map(([,v])=>v),backgroundColor:wingE.map((_,i)=>P[i%P.length]+'cc'),borderRadius:3,borderSkipped:false}]},{indexAxis:'y',scales:{x:{...xG,beginAtZero:true},y:nG},maintainAspectRatio:false});
   // Business driver chart — horizontal bar (clearer at a glance)
   const bdMap=h2.reduce((a,r)=>{const k=r.business_driver||'Unknown';a[k]=(a[k]||0)+r.positions;return a;},{});
   const bdColors={'Attrition replacement':'rgba(76,110,245,.85)','New initiative':'rgba(16,185,129,.85)','Squad scaling':'rgba(245,158,11,.85)','Capability gap':'rgba(124,58,237,.85)','Risk & Compliance Coverage':'rgba(6,182,212,.85)','New':'rgba(239,68,68,.85)'};
@@ -1078,13 +1100,14 @@ function render(){
     datasets:[{data:bdE.map(([,v])=>v),backgroundColor:bdE.map(([k])=>bdColors[k]||'rgba(160,160,180,.7)'),borderRadius:4,borderSkipped:false}]
   },{indexAxis:'y',scales:{x:{...xG,beginAtZero:true},y:nG},maintainAspectRatio:false});
   // Wing × Level stacked bar
-  const top6Wings=Object.entries(sm(h2,'wing','positions')).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([w])=>w);
+  const allWingsE=Object.entries(sm(h2,'wing','positions')).sort((a,b)=>b[1]-a[1]);
+  const allWings=allWingsE.map(([w])=>w);
   const wingLvls=[...new Set(h2.map(r=>r.level_short))].filter(l=>levelOrder.includes(l)).sort((a,b)=>levelOrder.indexOf(a)-levelOrder.indexOf(b));
   const wStackOpts={indexAxis:'y',plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:6,color:'#6b7a99',font:{size:9}}},datalabels:{display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=2,color:'#fff',font:{size:8,weight:'700'},formatter:v=>v,anchor:'center',align:'center'}},scales:{x:{...xG,beginAtZero:true,stacked:true},y:{...nG,stacked:true}},maintainAspectRatio:false};
-  mk('c4winglvl','bar',{labels:top6Wings.map(w=>sh(w,16)),datasets:wingLvls.map(lvl=>({label:lvl,data:top6Wings.map(w=>h2.filter(r=>r.wing===w&&r.level_short===lvl).reduce((a,r)=>a+r.positions,0)),backgroundColor:lvlColors[lvl]||'rgba(160,160,180,.7)',borderRadius:2,borderSkipped:false}))},wStackOpts);
+  mk('c4winglvl','bar',{labels:allWings.map(w=>sh(w,22)),datasets:wingLvls.map(lvl=>({label:lvl,data:allWings.map(w=>h2.filter(r=>r.wing===w&&r.level_short===lvl).reduce((a,r)=>a+r.positions,0)),backgroundColor:lvlColors[lvl]||'rgba(160,160,180,.7)',borderRadius:2,borderSkipped:false}))},wStackOpts);
   // P4 country-per-wing stacked
   const ctrsInWing=[...new Set(h2.map(r=>r.country))].sort((a,b)=>h2.filter(r=>r.country===b).length-h2.filter(r=>r.country===a).length);
-  mk('c4wingctr','bar',{labels:top6Wings.map(w=>sh(w,16)),datasets:ctrsInWing.map(c=>({label:c,data:top6Wings.map(w=>h2.filter(r=>r.wing===w&&r.country===c).reduce((a,r)=>a+r.positions,0)),backgroundColor:ctrColors[c]||P[ctrsInWing.indexOf(c)%P.length]+'cc',borderRadius:2,borderSkipped:false}))},wStackOpts);
+  mk('c4wingctr','bar',{labels:allWings.map(w=>sh(w,22)),datasets:ctrsInWing.map(c=>({label:c,data:allWings.map(w=>h2.filter(r=>r.wing===w&&r.country===c).reduce((a,r)=>a+r.positions,0)),backgroundColor:ctrColors[c]||P[ctrsInWing.indexOf(c)%P.length]+'cc',borderRadius:2,borderSkipped:false}))},wStackOpts);
 }
 
 let currentQFilter='all';

@@ -8,138 +8,285 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;background:#080c14;color:#dde1ed;font-family:'Inter',system-ui,sans-serif;font-size:13px;}
+html,body{height:100%;background:#080c14;color:#dde1ed;font-family:'Inter',system-ui,sans-serif;font-size:13px;}
+
+/* ═══════════════════════════════════════════
+   SHELL — fixed chrome, scrollable content
+═══════════════════════════════════════════ */
 .shell{display:flex;flex-direction:column;height:100vh;}
-.topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:50px;background:#0d1220;border-bottom:1px solid #1a2235;}
+
+/* TOP BAR */
+.topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:52px;background:#0d1220;border-bottom:1px solid #1a2235;}
 .topbar-left{display:flex;align-items:center;gap:14px;}
-.logo{width:26px;height:26px;background:linear-gradient(135deg,#4c6ef5,#7c3aed);border-radius:6px;display:flex;align-items:center;justify-content:center;}
-.logo svg{width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.logo{width:28px;height:28px;background:linear-gradient(135deg,#4c6ef5,#7c3aed);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .topbar h1{font-size:14px;font-weight:700;color:#fff;letter-spacing:-.2px;}
-.topbar-meta{font-size:10px;color:#4d5a78;}
+.topbar-meta{font-size:10px;color:#4d5a78;margin-top:1px;}
 .topbar-right{display:flex;align-items:center;gap:10px;}
-.badge{background:rgba(76,110,245,.15);border:1px solid rgba(76,110,245,.3);color:#7a9af7;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.5px;}
+.badge{background:rgba(76,110,245,.15);border:1px solid rgba(76,110,245,.3);color:#7a9af7;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px;}
 .date-lbl{font-size:10px;color:#4d5a78;}
 
-/* NAV */
-.navtabs{flex-shrink:0;display:flex;align-items:stretch;background:#0d1220;border-bottom:1px solid #1a2235;padding:0 24px;}
-.navtab{padding:0 15px;height:38px;display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:#4d5a78;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+/* NAV TABS */
+.navtabs{flex-shrink:0;display:flex;align-items:stretch;background:#0d1220;border-bottom:1px solid #1a2235;padding:0 24px;gap:2px;position:relative;z-index:10;}
+.navtab{padding:0 16px;height:40px;display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:#4d5a78;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
 .navtab:hover{color:#8ca0c8;}
 .navtab.active{color:#7a9af7;border-bottom-color:#4c6ef5;}
-.tn{width:17px;height:17px;border-radius:50%;background:rgba(76,110,245,.1);color:#4c6ef5;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+.tn{width:18px;height:18px;border-radius:50%;background:rgba(76,110,245,.1);color:#4c6ef5;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .navtab.active .tn{background:rgba(76,110,245,.25);}
 
 /* FILTER BAR */
-.filterbar{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:6px 24px;background:#0a0f1a;border-bottom:1px solid #141d2e;flex-wrap:nowrap;}
-.flbl{font-size:9.5px;color:#4d5a78;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-right:2px;white-space:nowrap;}
-.sep{width:1px;height:16px;background:#1a2235;flex-shrink:0;}
-.reset-btn{background:transparent;border:1px solid #1e2a3f;color:#4d5a78;font-size:10px;padding:4px 10px;border-radius:5px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.filterbar{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:7px 24px;background:#0a0f1a;border-bottom:1px solid #141d2e;flex-wrap:nowrap;overflow:visible;position:relative;z-index:100;}
+.filterbar::-webkit-scrollbar{height:0;}
+.flbl{font-size:9.5px;color:#4d5a78;font-weight:700;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;flex-shrink:0;}
+.sep{width:1px;height:18px;background:#1a2235;flex-shrink:0;}
+.reset-btn{background:transparent;border:1px solid #1e2a3f;color:#4d5a78;font-size:10px;padding:4px 10px;border-radius:5px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
 .reset-btn:hover{border-color:#4c6ef5;color:#7a9af7;}
-.fpill{font-size:10px;color:#7a9af7;padding:2px 8px;background:rgba(76,110,245,.1);border:1px solid rgba(76,110,245,.2);border-radius:9px;display:none;white-space:nowrap;}
+.fpill{font-size:10px;color:#7a9af7;padding:2px 8px;background:rgba(76,110,245,.1);border:1px solid rgba(76,110,245,.2);border-radius:9px;display:none;white-space:nowrap;flex-shrink:0;}
 
-/* MULTI-SELECT DROPDOWN */
+/* MSD DROPDOWN */
 .msd{position:relative;flex-shrink:0;}
-.msd-btn{display:flex;align-items:center;gap:6px;background:#111827;border:1px solid #1e2a3f;color:#9aa5bf;font-size:11px;padding:5px 8px 5px 9px;border-radius:5px;cursor:pointer;white-space:nowrap;min-width:110px;max-width:160px;transition:border-color .15s;user-select:none;}
+.msd-btn{display:flex;align-items:center;gap:6px;background:#111827;border:1px solid #1e2a3f;color:#9aa5bf;font-size:11px;padding:5px 9px;border-radius:6px;cursor:pointer;white-space:nowrap;min-width:115px;max-width:170px;transition:border-color .15s;user-select:none;}
 .msd-btn:hover,.msd-btn.open{border-color:#4c6ef5;color:#dde1ed;}
 .msd-btn .msd-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .msd-btn .msd-arrow{flex-shrink:0;width:8px;height:5px;opacity:.5;}
 .msd-btn .msd-count{flex-shrink:0;background:#4c6ef5;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:8px;line-height:1.4;}
-.msd-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:180px;max-width:240px;background:#111827;border:1px solid #2a3450;border-radius:7px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:999;display:none;overflow:hidden;}
+.msd-panel{position:fixed;top:0;left:0;min-width:190px;max-width:250px;background:#111827;border:1px solid #2a3450;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.6);z-index:99999;display:none;overflow:hidden;}
 .msd-panel.open{display:block;}
-.msd-search{width:100%;background:#0d1220;border:none;border-bottom:1px solid #1a2235;color:#dde1ed;font-size:11px;padding:7px 10px;outline:none;}
+.msd-search{width:100%;background:#0d1220;border:none;border-bottom:1px solid #1a2235;color:#dde1ed;font-size:11px;padding:8px 11px;outline:none;}
 .msd-search::placeholder{color:#4d5a78;}
-.msd-opts{max-height:200px;overflow-y:auto;}
+.msd-opts{max-height:210px;overflow-y:auto;}
 .msd-opts::-webkit-scrollbar{width:3px;}
 .msd-opts::-webkit-scrollbar-thumb{background:#2a3450;border-radius:3px;}
-.msd-opt{display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;font-size:11px;color:#9aa5bf;transition:background .1s;}
+.msd-opt{display:flex;align-items:center;gap:8px;padding:7px 11px;cursor:pointer;font-size:11px;color:#9aa5bf;transition:background .1s;}
 .msd-opt:hover{background:rgba(76,110,245,.1);color:#dde1ed;}
 .msd-opt input[type=checkbox]{accent-color:#4c6ef5;width:12px;height:12px;flex-shrink:0;cursor:pointer;}
 .msd-opt.selected{color:#dde1ed;}
-.msd-footer{padding:5px 10px;border-top:1px solid #1a2235;display:flex;justify-content:space-between;}
-.msd-footer button{background:none;border:none;color:#4d5a78;font-size:10px;cursor:pointer;padding:2px 4px;}
-.msd-footer button:hover{color:#7a9af7;}
+.msd-footer{padding:6px 11px;border-top:1px solid #1a2235;display:flex;justify-content:space-between;gap:4px;}
+.msd-footer button{background:none;border:none;color:#4d5a78;font-size:10px;cursor:pointer;padding:2px 5px;border-radius:4px;}
+.msd-footer button:hover{color:#7a9af7;background:rgba(76,110,245,.08);}
+.msd-footer .sel-all{color:#4c6ef5;font-weight:700;}
 .msd-disabled .msd-btn{opacity:.4;cursor:not-allowed;}
-.msd-disabled .msd-btn:hover{border-color:#1e2a3f;color:#9aa5bf;}
 
-/* CONTENT */
-.content{flex:1;overflow:hidden;position:relative;}
-.page{position:absolute;inset:0;display:none;padding:13px 22px;overflow:hidden;}
-.page.active{display:flex;flex-direction:column;gap:11px;}
+/* ═══════════════════════════════════════════
+   CONTENT AREA — scrollable pages
+═══════════════════════════════════════════ */
+.content{flex:1;position:relative;overflow:hidden;}
 
-/* KPI */
-.krow{display:flex;gap:10px;flex-shrink:0;}
-.kpi{flex:1;background:#0d1220;border:1px solid #1a2235;border-radius:9px;padding:12px 14px;position:relative;overflow:hidden;min-width:0;}
+/* Each page fills the content area and scrolls independently */
+.page{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  display:none;
+  overflow-y:auto;overflow-x:hidden;
+  padding:20px 24px 28px;
+  box-sizing:border-box;
+}
+.page::-webkit-scrollbar{width:5px;}
+.page::-webkit-scrollbar-thumb{background:#1e2a3f;border-radius:5px;}
+.page.active{display:block;}
+
+/* ═══════════════════════════════════════════
+   SECTION SYSTEM
+   Each section = a .sec block with a header
+   Sections stack vertically with margin-bottom
+═══════════════════════════════════════════ */
+.sec{margin-bottom:22px;}
+.sec:last-child{margin-bottom:0;}
+
+.sec-hdr{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;
+  color:#4d5a78;margin-bottom:10px;padding-bottom:6px;
+  border-bottom:1px solid #0f1624;
+  display:flex;align-items:center;gap:8px;
+}
+.sec-hdr::before{content:'';display:block;width:3px;height:3px;border-radius:50%;background:#4c6ef5;flex-shrink:0;}
+
+/* ═══════════════════════════════════════════
+   KPI STRIP
+═══════════════════════════════════════════ */
+.krow{display:flex;gap:10px;flex-wrap:nowrap;}
+.kpi{
+  flex:1;min-width:130px;
+  background:#0d1220;border:1px solid #1a2235;border-radius:10px;
+  padding:13px 16px;position:relative;overflow:hidden;
+}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-.kpi.blue::before{background:#4c6ef5;}.kpi.purple::before{background:#7c3aed;}.kpi.green::before{background:#10b981;}
-.kpi.amber::before{background:#f59e0b;}.kpi.red::before{background:#ef4444;}.kpi.teal::before{background:#06b6d4;}
-.kpi.rose::before{background:#f43f5e;}.kpi.indigo::before{background:#6366f1;}.kpi.slate::before{background:#64748b;}
-.klbl{font-size:9px;color:#4d5a78;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
-.kval{font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1;}
-.kval.sm{font-size:15px;padding-top:3px;font-weight:700;letter-spacing:-.3px;}
-.ksub{font-size:10px;color:#4d5a78;margin-top:5px;}
+.kpi.blue::before{background:#4c6ef5;}.kpi.purple::before{background:#7c3aed;}
+.kpi.green::before{background:#10b981;}.kpi.amber::before{background:#f59e0b;}
+.kpi.red::before{background:#ef4444;}.kpi.teal::before{background:#06b6d4;}
+.kpi.rose::before{background:#f43f5e;}.kpi.indigo::before{background:#6366f1;}
+.kpi.slate::before{background:#64748b;}.kpi.cyan::before{background:#22d3ee;}
+.klbl{font-size:9px;color:#4d5a78;font-weight:700;text-transform:uppercase;letter-spacing:.9px;margin-bottom:8px;}
+.kval{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1;}
+.kval.sm{font-size:16px;padding-top:3px;font-weight:700;letter-spacing:-.3px;}
+.ksub{font-size:10px;color:#8ca0c8;margin-top:6px;line-height:1.4;}
 .ksub .hi{color:#10b981;font-weight:600;}.ksub .wa{color:#f59e0b;font-weight:600;}.ksub .bl{color:#7a9af7;font-weight:600;}
 
-/* GRID */
-.grid{display:grid;gap:10px;flex:1;min-height:0;}
-.g3{grid-template-columns:1fr 1fr 1fr;}.g2{grid-template-columns:1fr 1fr;}
-.g53{grid-template-columns:5fr 3fr;}.g32{grid-template-columns:3fr 2fr;}
-.g23{grid-template-columns:2fr 3fr;}.g322{grid-template-columns:3fr 2fr 2fr;}
+/* ═══════════════════════════════════════════
+   GRID LAYOUTS
+═══════════════════════════════════════════ */
+.row{display:grid;gap:12px;margin-bottom:12px;align-items:start;}
+.row:last-child{margin-bottom:0;}
+.col-1{grid-template-columns:1fr;}
+.col-2{grid-template-columns:1fr 1fr;}
+.col-3{grid-template-columns:1fr 1fr 1fr;}
+.col-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.col-322{grid-template-columns:3fr 2fr 2fr;}
+.col-53{grid-template-columns:5fr 3fr;}
+.col-23{grid-template-columns:2fr 3fr;}
+.col-32{grid-template-columns:3fr 2fr;}
 
-/* CARD */
-.card{background:#0d1220;border:1px solid #1a2235;border-radius:9px;padding:13px 15px;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
-.chard{font-size:11px;font-weight:600;color:#8ca0c8;margin-bottom:9px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+/* ═══════════════════════════════════════════
+   CARD
+═══════════════════════════════════════════ */
+.card{
+  background:#0d1220;border:1px solid #1a2235;border-radius:10px;
+  padding:16px 18px;
+  display:flex;flex-direction:column;
+}
+.chard{
+  font-size:11px;font-weight:600;color:#8ca0c8;
+  margin-bottom:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  line-height:1.3;
+}
 .chard small{font-size:9px;color:#4d5a78;font-weight:400;margin-left:6px;}
-.chart-wrap{flex:1;min-height:0;position:relative;}
-canvas{position:absolute;inset:0;}
 
-/* TABLE */
-.tw{flex:1;overflow-y:auto;min-height:0;}
-.tw::-webkit-scrollbar{width:3px;}
-.tw::-webkit-scrollbar-thumb{background:#1e2a3f;border-radius:3px;}
+/* Chart wrapper — explicit heights for clean rendering */
+.ch{position:relative;width:100%;display:block;}
+.ch-180{height:180px;}.ch-200{height:200px;}.ch-220{height:220px;}.ch-240{height:240px;}.ch-260{height:260px;}
+.ch-280{height:280px;}.ch-300{height:300px;}.ch-340{height:340px;}.ch-380{height:380px;}
+.ch-420{height:420px;}
+.ch canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important;}
+
+/* ═══════════════════════════════════════════
+   TABLE (internal scroll)
+═══════════════════════════════════════════ */
+.tw{overflow-y:auto;}
+.tw::-webkit-scrollbar{width:4px;}
+.tw::-webkit-scrollbar-thumb{background:#1e2a3f;border-radius:4px;}
 table{width:100%;border-collapse:collapse;font-size:11px;}
-thead th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#4d5a78;padding:0 7px 7px;text-align:left;position:sticky;top:0;background:#0d1220;z-index:1;}
+thead th{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  color:#4d5a78;padding:0 8px 8px;text-align:left;
+  position:sticky;top:0;background:#0d1220;z-index:1;
+  border-bottom:1px solid #141d2e;
+}
 thead th:not(:first-child){text-align:right;}
-tbody td{padding:5px 7px;border-top:1px solid #0f1624;color:#9aa5bf;}
+tbody td{padding:6px 8px;border-top:1px solid #0d1320;color:#9aa5bf;}
 tbody td:not(:first-child){text-align:right;font-weight:600;color:#dde1ed;}
 tbody tr:hover td{background:rgba(76,110,245,.04);}
-.pill{display:inline-flex;padding:2px 6px;border-radius:8px;font-size:9px;font-weight:700;}
-.pill.g{background:rgba(16,185,129,.12);color:#10b981;}.pill.a{background:rgba(245,158,11,.12);color:#f59e0b;}
-.pill.r{background:rgba(239,68,68,.12);color:#ef4444;}.pill.b{background:rgba(76,110,245,.12);color:#7a9af7;}
-.pill.t{background:rgba(6,182,212,.12);color:#06b6d4;}.pill.p{background:rgba(124,58,237,.12);color:#a78bfa;}
 .role-tbl thead th:not(:first-child){text-align:left;}
 .role-tbl tbody td:not(:first-child){text-align:left;font-weight:400;color:#9aa5bf;}
 .role-tbl tbody td.num{text-align:right!important;font-weight:700!important;color:#dde1ed!important;}
 
+/* ═══════════════════════════════════════════
+   PILLS
+═══════════════════════════════════════════ */
+.pill{display:inline-flex;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:700;}
+.pill.g{background:rgba(16,185,129,.12);color:#10b981;}
+.pill.a{background:rgba(245,158,11,.12);color:#f59e0b;}
+.pill.r{background:rgba(239,68,68,.12);color:#ef4444;}
+.pill.b{background:rgba(76,110,245,.12);color:#7a9af7;}
+.pill.t{background:rgba(6,182,212,.12);color:#06b6d4;}
+.pill.p{background:rgba(124,58,237,.12);color:#a78bfa;}
 
-/* QUARTER TABS */
-.qtab{background:rgba(76,110,245,.08);border:1px solid #1e2a3f;color:#6b7a99;font-size:10px;font-weight:700;padding:4px 12px;border-radius:5px;cursor:pointer;transition:all .15s;letter-spacing:.3px;}
+/* ═══════════════════════════════════════════
+   QUARTER TOGGLE
+═══════════════════════════════════════════ */
+.qtab-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.qtab{
+  background:rgba(76,110,245,.08);border:1px solid #1e2a3f;
+  color:#6b7a99;font-size:10px;font-weight:700;
+  padding:5px 14px;border-radius:6px;cursor:pointer;
+  transition:all .15s;letter-spacing:.3px;
+}
 .qtab:hover{border-color:#4c6ef5;color:#7a9af7;}
 .qtab.active{background:rgba(76,110,245,.2);border-color:#4c6ef5;color:#7a9af7;}
-/* SELECT ALL */
-.sel-all{color:#4c6ef5!important;font-weight:700!important;}
-.sel-all:hover{color:#7a9af7!important;}
-/* FOOTER */
-.footer{flex-shrink:0;padding:5px 24px;border-top:1px solid #111827;display:flex;align-items:center;justify-content:space-between;}
+.qtab-label{font-size:9.5px;color:#4d5a78;font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
+.q-badge{
+  background:rgba(76,110,245,.12);border:1px solid rgba(76,110,245,.2);
+  padding:4px 12px;border-radius:6px;font-size:11px;color:#7a9af7;font-weight:700;
+}
+
+/* ═══════════════════════════════════════════
+   COUNTRY × LEVEL MATRIX
+═══════════════════════════════════════════ */
+.matrix-tbl{width:100%;border-collapse:collapse;font-size:10px;}
+.matrix-tbl th{
+  font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  color:#4d5a78;padding:5px 8px;text-align:center;
+  background:#0a0f1a;border:1px solid #111827;
+  position:sticky;top:0;z-index:1;
+}
+.matrix-tbl th:first-child{text-align:left;min-width:64px;}
+.matrix-tbl td{
+  padding:6px 10px;text-align:center;font-size:11px;
+  border:1px solid #0d1320;transition:filter .1s;
+}
+.matrix-tbl td:first-child{text-align:left;color:#6b7a99;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;}
+.matrix-tbl tr:hover td{filter:brightness(1.15);}
+.matrix-tbl .matrix-row-lbl{background:#0a0f1a;}
+.matrix-tbl .matrix-total-row td{background:rgba(76,110,245,.06);color:#7a9af7;font-weight:700;border-top:1px solid #1a2235;}
+.matrix-tbl .matrix-total-row td:first-child{color:#4d5a78;}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.footer{
+  flex-shrink:0;padding:6px 24px;
+  border-top:1px solid #111827;
+  background:#080c14;
+  display:flex;align-items:center;justify-content:space-between;
+}
 .footer-l,.footer-r{font-size:9.5px;color:#2d3a52;}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — stack at narrow widths
+═══════════════════════════════════════════ */
+@media(max-width:1200px){
+  .col-4{grid-template-columns:1fr 1fr;}
+  .col-322{grid-template-columns:1fr 1fr;}
+  .kpi{min-width:110px;}
+}
+@media(max-width:900px){
+  .col-3,.col-322,.col-53,.col-32{grid-template-columns:1fr 1fr;}
+  .col-23{grid-template-columns:1fr;}
+  .krow{flex-wrap:wrap;}
+  .kpi{min-width:40%;flex:1 1 40%;}
+}
+@media(max-width:640px){
+  .col-2,.col-3,.col-4,.col-322,.col-53,.col-32,.col-23{grid-template-columns:1fr;}
+  .page{padding:14px 14px 24px;}
+}
 </style>
 </head>
 <body>
 <div class="shell">
 
+<!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
     <div><h1>H2 2026 Manpower Planning</h1><div class="topbar-meta">NEXT Ventures / FundedNext Group</div></div>
   </div>
-  <div class="topbar-right"><span class="date-lbl">As of July 22, 2026</span><span class="badge">H2 FY2026</span></div>
+  <div class="topbar-right">
+    <span class="date-lbl">As of July 22, 2026</span>
+    <span class="badge">H2 FY2026</span>
+  </div>
 </div>
 
+<!-- NAV -->
 <div class="navtabs">
   <button class="navtab active" onclick="goTab(0,this)"><span class="tn">1</span>Workforce Overview</button>
   <button class="navtab" onclick="goTab(1,this)"><span class="tn">2</span>H2 Hiring Demand</button>
   <button class="navtab" onclick="goTab(2,this)"><span class="tn">3</span>H1 Carry Forward</button>
   <button class="navtab" onclick="goTab(3,this)"><span class="tn">4</span>Department Breakdown</button>
-  <button class="navtab" onclick="goTab(4,this)"><span class="tn">5</span>Role & Wing Detail</button>
+  <button class="navtab" onclick="goTab(4,this)"><span class="tn">5</span>Role &amp; Wing Detail</button>
 </div>
 
 <!-- FILTER BAR -->
@@ -152,101 +299,194 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
   <div class="msd" id="msd-country"><div class="msd-btn" onclick="toggleMSD('msd-country')"><span class="msd-label">Country</span><svg class="msd-arrow" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#6b7594"/></svg></div><div class="msd-panel"><div class="msd-opts" id="opts-country"></div><div class="msd-footer"><button class="sel-all" onclick="selectAllMSD('msd-country')">All</button><button onclick="clearMSD('msd-country')">Clear</button><button onclick="closeMSD('msd-country')">Done</button></div></div></div>
   <div class="msd" id="msd-emptype"><div class="msd-btn" onclick="toggleMSD('msd-emptype')"><span class="msd-label">Emp. Type</span><svg class="msd-arrow" viewBox="0 0 8 5"><path d="M0 0l4 5 4-5z" fill="#6b7594"/></svg></div><div class="msd-panel"><div class="msd-opts" id="opts-emptype"></div><div class="msd-footer"><button class="sel-all" onclick="selectAllMSD('msd-emptype')">All</button><button onclick="clearMSD('msd-emptype')">Clear</button><button onclick="closeMSD('msd-emptype')">Done</button></div></div></div>
   <div class="sep"></div>
-  <button class="reset-btn" onclick="resetAll()">&#8635; Reset</button>
+  <button class="reset-btn" onclick="resetAll()">↺ Reset</button>
   <span class="fpill" id="fpill"></span>
 </div>
 
 <div class="content">
 
-<!-- PAGE 0: WORKFORCE OVERVIEW -->
+<!-- ══════════════════════════════════════
+  PAGE 0: WORKFORCE OVERVIEW
+  Layout: KPIs → 3 charts (dept, level, country)
+  Everything fits comfortably; no scroll needed for most screens
+══════════════════════════════════════ -->
 <div class="page active" id="p0">
-  <div class="krow">
-    <div class="kpi blue"><div class="klbl">Current Headcount</div><div class="kval" id="k0hc">508</div><div class="ksub" id="k0hcsub">485 FTE · 23 Virtual Exec</div></div>
-    <div class="kpi indigo"><div class="klbl">Total Hiring Demand 2026</div><div class="kval" id="k0demand">—</div><div class="ksub">H2 requests + H1 carry forward</div></div>
-    <div class="kpi green"><div class="klbl">Projected Headcount</div><div class="kval" id="k0proj">—</div><div class="ksub"><span class="hi" id="k0net">—</span> total new positions</div></div>
-    <div class="kpi amber"><div class="klbl">HC Growth</div><div class="kval" id="k0gr">—</div><div class="ksub">H2 requests + H1 carry forward</div></div>
-    <div class="kpi teal"><div class="klbl">H1 Carry Forward</div><div class="kval" id="k0sp">49</div><div class="ksub">Open vacancies from H1</div></div>
-    <div class="kpi purple"><div class="klbl">H2 Hiring Requests</div><div class="kval" id="k0h2">68</div><div class="ksub">All <span class="bl">Submitted</span></div></div>
-  </div>
-  <div class="grid g3" style="flex:1;min-height:0;">
-    <div class="card"><div class="chard">Headcount by Department</div><div class="chart-wrap"><canvas id="c0dept"></canvas></div></div>
-    <div class="card"><div class="chard">Job Level Breakdown <small>current HC</small></div><div class="chart-wrap"><canvas id="c0level"></canvas></div></div>
-    <div class="card"><div class="chard">HC by Country</div><div class="chart-wrap"><canvas id="c0ctr"></canvas></div></div>
-  </div>
-</div>
 
-<!-- PAGE 1: H2 HIRING DEMAND -->
-<div class="page" id="p1">
-  <div class="krow">
-    <div class="kpi purple"><div class="klbl">Total H2 Requests</div><div class="kval" id="k1tot">—</div><div class="ksub">All <span class="bl">Submitted</span></div></div>
-    <div class="kpi red"><div class="klbl">Critical Priority</div><div class="kval" id="k1crit">—</div><div class="ksub"><span class="wa" id="k1critp">—</span> of requests</div></div>
-    <div class="kpi amber"><div class="klbl">High Priority</div><div class="kval" id="k1high">—</div><div class="ksub"><span class="wa" id="k1highp">—</span> of requests</div></div>
-    <div class="kpi slate"><div class="klbl">Medium Priority</div><div class="kval" id="k1med">—</div><div class="ksub"><span class="bl" id="k1medp">—</span> of requests</div></div>
-    <div class="kpi blue"><div class="klbl">FundedNext</div><div class="kval" id="k1fn">—</div><div class="ksub">positions</div></div>
-    <div class="kpi teal"><div class="klbl">FNmarkets</div><div class="kval" id="k1fnm">—</div><div class="ksub">positions</div></div>
-    <div class="kpi rose"><div class="klbl">Shared Services</div><div class="kval" id="k1ss">—</div><div class="ksub">positions</div></div>
+  <div class="sec">
+    <div class="krow">
+      <div class="kpi blue"><div class="klbl">Current Headcount</div><div class="kval" id="k0hc">—</div><div class="ksub" id="k0hcsub">—</div></div>
+      <div class="kpi indigo"><div class="klbl">Total Hiring Demand</div><div class="kval" id="k0demand">—</div><div class="ksub">H2 requests + H1 carry forward</div></div>
+      <div class="kpi green"><div class="klbl">Projected Headcount</div><div class="kval" id="k0proj">—</div><div class="ksub"><span class="hi" id="k0net">—</span> total new positions</div></div>
+      <div class="kpi amber"><div class="klbl">HC Growth</div><div class="kval" id="k0gr">—</div><div class="ksub">vs. current headcount</div></div>
+      <div class="kpi teal"><div class="klbl">H1 Carry Forward</div><div class="kval" id="k0sp">—</div><div class="ksub">Open vacancies from H1</div></div>
+      <div class="kpi purple"><div class="klbl">H2 Hiring Requests</div><div class="kval" id="k0h2">—</div><div class="ksub">All <span class="bl">Submitted</span></div></div>
+    </div>
   </div>
-  <!-- Q3/Q4 toggle bar -->
-  <div style="flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 2px;">
-    <span style="font-size:9.5px;color:#4d5a78;font-weight:700;text-transform:uppercase;letter-spacing:.8px;">Quarter</span>
-    <button class="qtab active" id="qt-all" onclick="setQTab('all',this)">All H2</button>
-    <button class="qtab" id="qt-q3" onclick="setQTab('q3',this)">Q3 2026</button>
-    <button class="qtab" id="qt-q4" onclick="setQTab('q4',this)">Q4 2026</button>
-    <span style="font-size:10px;color:#4d5a78;margin-left:8px;" id="q-sub-lbl"></span>
-  </div>
-  <!-- KPI row for selected quarter -->
-  <div class="krow" id="qkrow" style="flex-shrink:0;">
-    <div class="kpi blue"><div class="klbl">Positions</div><div class="kval" id="qk-tot">—</div><div class="ksub" id="qk-totsub">—</div></div>
-    <div class="kpi red"><div class="klbl">Critical</div><div class="kval" id="qk-crit">—</div><div class="ksub" id="qk-critp">—</div></div>
-    <div class="kpi amber"><div class="klbl">High</div><div class="kval" id="qk-high">—</div><div class="ksub" id="qk-highp">—</div></div>
-    <div class="kpi slate"><div class="klbl">Medium</div><div class="kval" id="qk-med">—</div><div class="ksub" id="qk-medp">—</div></div>
-    <div class="kpi purple"><div class="klbl">Q3 Positions</div><div class="kval" id="qk-q3">—</div><div class="ksub">Jul – Sep 2026</div></div>
-    <div class="kpi teal"><div class="klbl">Q4 Positions</div><div class="kval" id="qk-q4">—</div><div class="ksub">Oct – Dec 2026</div></div>
-  </div>
-  <div class="grid g322" style="flex:1;min-height:0;">
-    <div class="card"><div class="chard">Requests by Department <small id="c1dept-lbl"></small></div><div class="chart-wrap"><canvas id="c1dept"></canvas></div></div>
-    <div class="card"><div class="chard">Priority Distribution <small id="c1pri-lbl"></small></div><div class="chart-wrap"><canvas id="c1pri"></canvas></div></div>
-    <div class="card"><div class="chard">Job Level Breakdown <small id="c1level-lbl">H2 requests</small></div><div class="chart-wrap"><canvas id="c1level"></canvas></div></div>
-  </div>
-</div>
 
-<!-- PAGE 2: H1 CARRY FORWARD -->
-<div class="page" id="p2">
-  <div class="krow">
-    <div class="kpi teal"><div class="klbl">Total Carry Forward</div><div class="kval" id="k2tot">49</div><div class="ksub">H1 positions still open</div></div>
-    <div class="kpi amber"><div class="klbl">In Progress</div><div class="kval" id="k2ip">—</div><div class="ksub"><span class="wa" id="k2ipp">—</span> of carry forward</div></div>
-    <div class="kpi blue"><div class="klbl">Offer Stage</div><div class="kval" id="k2os">—</div><div class="ksub"><span class="bl" id="k2osp">—</span> nearing closure</div></div>
-    <div class="kpi purple"><div class="klbl">Top Dept</div><div class="kval sm" id="k2tdept">—</div><div class="ksub" id="k2tdeptn">—</div></div>
-    <div class="kpi green"><div class="klbl">Top Country</div><div class="kval sm" id="k2tctr">—</div><div class="ksub" id="k2tctrn">—</div></div>
-  </div>
-  <div class="grid g23" style="flex:1;min-height:0;">
-    <div class="card">
-      <div class="chard">Carry Forward — Role Level Detail</div>
-      <div class="tw">
-        <table class="role-tbl">
-          <thead><tr><th>Department</th><th style="text-align:left">Role Name</th><th style="text-align:left">Level</th><th style="text-align:left">Country</th><th style="text-align:left">BU</th><th style="text-align:left">Status</th></tr></thead>
-          <tbody id="t2spill"></tbody>
-        </table>
+  <div class="sec">
+    <div class="row col-3">
+      <div class="card">
+        <div class="chard">Headcount by Department <small>top 14</small></div>
+        <div class="ch ch-340"><canvas id="c0dept"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chard">Job Level Distribution <small>current HC</small></div>
+        <div class="ch ch-340"><canvas id="c0level"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chard">Headcount by Country</div>
+        <div class="ch ch-340"><canvas id="c0ctr"></canvas></div>
       </div>
     </div>
-    <div class="grid" style="grid-template-rows:1fr 1fr;gap:10px;">
-      <div class="card"><div class="chard">By Department</div><div class="chart-wrap"><canvas id="c2dept"></canvas></div></div>
-      <div class="card"><div class="chard">Job Level Breakdown <small>carry forward</small></div><div class="chart-wrap"><canvas id="c2level"></canvas></div></div>
+  </div>
+
+</div><!-- /p0 -->
+
+<!-- ══════════════════════════════════════
+  PAGE 1: H2 HIRING DEMAND
+  Layout:
+    KPI strip (7 cards)
+    Quarter toggle + quarter KPIs
+    Row 1: Dept bar + Priority donut + Level bar  (ch-280)
+    Row 2: Country bar + Country×Priority stacked + Country×Quarter stacked  (ch-240)
+    Row 3: Country × Level matrix table (full width)
+══════════════════════════════════════ -->
+<div class="page" id="p1">
+
+  <div class="sec">
+    <div class="krow">
+      <div class="kpi purple"><div class="klbl">Total H2 Requests</div><div class="kval" id="k1tot">—</div><div class="ksub">All <span class="bl">Submitted</span></div></div>
+      <div class="kpi red"><div class="klbl">Critical</div><div class="kval" id="k1crit">—</div><div class="ksub"><span class="wa" id="k1critp">—</span> of requests</div></div>
+      <div class="kpi amber"><div class="klbl">High</div><div class="kval" id="k1high">—</div><div class="ksub"><span class="wa" id="k1highp">—</span> of requests</div></div>
+      <div class="kpi slate"><div class="klbl">Medium</div><div class="kval" id="k1med">—</div><div class="ksub"><span class="bl" id="k1medp">—</span> of requests</div></div>
+      <div class="kpi blue"><div class="klbl">FundedNext</div><div class="kval" id="k1fn">—</div><div class="ksub">positions</div></div>
+      <div class="kpi teal"><div class="klbl">FNmarkets</div><div class="kval" id="k1fnm">—</div><div class="ksub">positions</div></div>
+      <div class="kpi rose"><div class="klbl">Shared Services</div><div class="kval" id="k1ss">—</div><div class="ksub">positions</div></div>
     </div>
   </div>
-</div>
 
-<!-- PAGE 3: DEPARTMENT BREAKDOWN -->
+  <div class="sec">
+    <div class="qtab-row" style="margin-bottom:10px;">
+      <span class="qtab-label">Quarter</span>
+      <button class="qtab active" id="qt-all" onclick="setQTab('all',this)">All H2</button>
+      <button class="qtab" id="qt-q3" onclick="setQTab('q3',this)">Q3 2026 <span id="qk-q3" style="font-size:9px;opacity:.8;margin-left:4px;"></span></button>
+      <button class="qtab" id="qt-q4" onclick="setQTab('q4',this)">Q4 2026 <span id="qk-q4" style="font-size:9px;opacity:.8;margin-left:4px;"></span></button>
+      <span id="q-sub-lbl" style="font-size:10px;color:#4d5a78;margin-left:4px;"></span>
+    </div>
+    <div class="krow" style="margin-bottom:0;">
+      <div class="kpi blue"><div class="klbl">Positions</div><div class="kval" id="qk-tot">—</div><div class="ksub" id="qk-totsub">—</div></div>
+      <div class="kpi red"><div class="klbl">Critical</div><div class="kval" id="qk-crit">—</div><div class="ksub" id="qk-critp">—</div></div>
+      <div class="kpi amber"><div class="klbl">High</div><div class="kval" id="qk-high">—</div><div class="ksub" id="qk-highp">—</div></div>
+      <div class="kpi slate"><div class="klbl">Medium</div><div class="kval" id="qk-med">—</div><div class="ksub" id="qk-medp">—</div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hdr">Demand Analysis</div>
+    <div class="row col-322">
+      <div class="card">
+        <div class="chard">Requests by Department <small id="c1dept-lbl"></small></div>
+        <div class="ch ch-280"><canvas id="c1dept"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chard">Priority Distribution <small id="c1pri-lbl"></small></div>
+        <div class="ch ch-280"><canvas id="c1pri"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chard">Job Level Breakdown <small id="c1level-lbl"></small></div>
+        <div class="ch ch-280"><canvas id="c1level"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hdr">Location Strategy</div>
+    <div class="row col-3">
+      <div class="card">
+        <div class="chard">Hiring by Country <small id="c1ctr-lbl"></small></div>
+        <div class="ch ch-240"><canvas id="c1ctr"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chard">Country × Priority <small id="c1ctrpri-lbl"></small></div>
+        <div class="ch ch-240"><canvas id="c1ctrpri"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="chard">Country × Quarter <small>Q3 vs Q4 split</small></div>
+        <div class="ch ch-240"><canvas id="c1ctrq"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hdr">Country × Job Level Matrix <small style="font-size:9px;color:#2d3a52;font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px;">positions by hiring location and seniority</small></div>
+    <div class="card">
+      <div class="tw" style="max-height:280px;" id="c1matrix"></div>
+    </div>
+  </div>
+
+</div><!-- /p1 -->
+
+<!-- ══════════════════════════════════════
+  PAGE 2: H1 CARRY FORWARD
+  Layout:
+    KPI strip
+    Left: table with internal scroll | Right: 2 stacked charts
+══════════════════════════════════════ -->
+<div class="page" id="p2">
+
+  <div class="sec">
+    <div class="krow">
+      <div class="kpi teal"><div class="klbl">Total Carry Forward</div><div class="kval" id="k2tot">—</div><div class="ksub">H1 positions still open</div></div>
+      <div class="kpi amber"><div class="klbl">In Progress</div><div class="kval" id="k2ip">—</div><div class="ksub"><span class="wa" id="k2ipp">—</span> of carry forward</div></div>
+      <div class="kpi blue"><div class="klbl">Offer Stage</div><div class="kval" id="k2os">—</div><div class="ksub"><span class="bl" id="k2osp">—</span> nearing closure</div></div>
+      <div class="kpi purple"><div class="klbl">Top Dept</div><div class="kval sm" id="k2tdept">—</div><div class="ksub" id="k2tdeptn">—</div></div>
+      <div class="kpi green"><div class="klbl">Top Country</div><div class="kval sm" id="k2tctr">—</div><div class="ksub" id="k2tctrn">—</div></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="row col-23" style="align-items:start;">
+      <div class="card">
+        <div class="chard">Carry Forward — Role Detail</div>
+        <div class="tw" style="max-height:420px;">
+          <table class="role-tbl">
+            <thead><tr><th>Department</th><th style="text-align:left">Role</th><th style="text-align:left">Level</th><th style="text-align:left">Country</th><th style="text-align:left">BU</th><th style="text-align:left">Status</th></tr></thead>
+            <tbody id="t2spill"></tbody>
+          </table>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="card">
+          <div class="chard">By Department <small>carry forward</small></div>
+          <div class="ch ch-200"><canvas id="c2dept"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="chard">Job Level Breakdown <small>carry forward</small></div>
+          <div class="ch ch-200"><canvas id="c2level"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /p2 -->
+
+<!-- ══════════════════════════════════════
+  PAGE 3: DEPARTMENT BREAKDOWN
+  Layout:
+    Row 1: Big grouped bar + summary table
+    Row 2: H2 level per dept + HC level per dept + Country per dept (3 equal)
+══════════════════════════════════════ -->
 <div class="page" id="p3">
-  <div style="display:flex;flex-direction:column;gap:10px;flex:1;min-height:0;">
-    <div class="grid g53" style="flex:2;min-height:0;">
+
+  <div class="sec">
+    <div class="row col-53">
       <div class="card">
         <div class="chard">Current HC vs H2 Requests vs H1 Carry Forward — by Department</div>
-        <div class="chart-wrap"><canvas id="c3comp"></canvas></div>
+        <div class="ch ch-340"><canvas id="c3comp"></canvas></div>
       </div>
       <div class="card">
-        <div class="chard">Department Summary <small>sorted by HC</small></div>
-        <div class="tw">
+        <div class="chard">Department Summary <small>sorted by current HC</small></div>
+        <div class="tw" style="max-height:340px;">
           <table>
             <thead><tr><th>Department</th><th>HC</th><th>H2 Req</th><th>H1 C/F</th><th>Proj.</th><th>Growth</th></tr></thead>
             <tbody id="t3dept"></tbody>
@@ -254,52 +494,116 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
         </div>
       </div>
     </div>
-    <div class="grid g2" style="flex:1;min-height:0;">
-      <div class="card"><div class="chard">H2 Requests by Level — per Department <small>top 8 depts</small></div><div class="chart-wrap"><canvas id="c3lvldept"></canvas></div></div>
-      <div class="card"><div class="chard">Current HC Level Distribution — per Department <small>top 8 depts</small></div><div class="chart-wrap"><canvas id="c3hclvl"></canvas></div></div>
-    </div>
   </div>
-</div>
 
-<!-- PAGE 4: ROLE & WING DETAIL -->
-<div class="page" id="p4">
-  <div class="grid g2" style="flex:1;min-height:0;">
-    <div style="display:flex;flex-direction:column;gap:10px;min-height:0;">
-      <div class="card" style="flex:3;min-height:0;">
-        <div class="chard">H2 Request Breakdown — by Role & Wing</div>
-        <div class="tw">
-          <table class="role-tbl">
-            <thead><tr><th>Department</th><th style="text-align:left">Wing</th><th style="text-align:left">Level</th><th style="text-align:left">Role Name</th><th style="text-align:left">Business Driver</th><th style="text-align:left">Priority</th><th style="text-align:left">Country</th><th style="text-align:right">HC</th></tr></thead>
-            <tbody id="t4role"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="card" style="flex:2;min-height:0;">
-        <div class="chard">H1 Carry Forward — by Role & Level</div>
-        <div class="tw">
-          <table class="role-tbl">
-            <thead><tr><th>Department</th><th style="text-align:left">Role Name</th><th style="text-align:left">Level</th><th style="text-align:left">Country</th><th style="text-align:left">BU</th><th style="text-align:left">Status</th></tr></thead>
-            <tbody id="t4spill"></tbody>
-          </table>
-        </div>
+  <div class="sec">
+    <div class="sec-hdr">Level &amp; Location Analytics — by Department</div>
+
+    <div class="row col-1" style="margin-bottom:12px;">
+      <div class="card">
+        <div class="chard">H2 Requests by Level <small>top 6 departments · horizontal stacked by job level</small></div>
+        <div class="ch ch-300"><canvas id="c3lvldept"></canvas></div>
       </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;min-height:0;">
-      <div class="card" style="flex:1;min-height:0;">
-        <div class="chard">H2 Requests by Wing</div>
-        <div class="chart-wrap"><canvas id="c4wing"></canvas></div>
-      </div>
-      <div class="card" style="flex:1;min-height:0;">
-        <div class="chard">Level Distribution — H2 Requests by Wing <small>top 6</small></div>
-        <div class="chart-wrap"><canvas id="c4winglvl"></canvas></div>
-      </div>
-      <div class="card" style="flex:1;min-height:0;">
-        <div class="chard">Business Driver Split</div>
-        <div class="chart-wrap"><canvas id="c4bdriver"></canvas></div>
+
+    <div class="row col-1" style="margin-bottom:12px;">
+      <div class="card">
+        <div class="chard">Current HC by Level <small>top 6 departments · horizontal stacked by job level</small></div>
+        <div class="ch ch-300"><canvas id="c3hclvl"></canvas></div>
       </div>
     </div>
+
+    <div class="row col-1" style="margin-bottom:0;">
+      <div class="card">
+        <div class="chard">H2 Hiring by Country <small>top 6 departments · horizontal stacked by country</small></div>
+        <div class="ch ch-300"><canvas id="c3ctrdept"></canvas></div>
+      </div>
+    </div>
+
   </div>
-</div>
+
+</div><!-- /p3 -->
+
+<!-- ══════════════════════════════════════
+  PAGE 4: ROLE & WING DETAIL
+  Layout:
+    Left col: H2 role table (internal scroll) + Carry forward table (internal scroll)
+    Right col: Wing bar + Business Driver bar + Level×Wing stacked + Country×Wing stacked
+══════════════════════════════════════ -->
+<div class="page" id="p4">
+
+  <!-- ROW 1: H2 Role table (left) | H2 Requests by Wing chart (right) -->
+  <div class="row col-2" style="align-items:start;margin-bottom:12px;">
+
+    <div class="card">
+      <div class="chard">H2 Request Breakdown — by Role &amp; Wing</div>
+      <div class="tw" style="max-height:380px;">
+        <table class="role-tbl">
+          <thead><tr>
+            <th>Department</th>
+            <th style="text-align:left">Wing</th>
+            <th style="text-align:left">Level</th>
+            <th style="text-align:left">Role</th>
+            <th style="text-align:left">Business Driver</th>
+            <th style="text-align:left">Priority</th>
+            <th style="text-align:left">Country</th>
+            <th style="text-align:right">HC</th>
+          </tr></thead>
+          <tbody id="t4role"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chard">H2 Requests by Wing</div>
+      <div class="ch ch-380"><canvas id="c4wing"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: H1 Carry Forward table (left) | Level by Wing chart (right) -->
+  <div class="row col-2" style="align-items:start;margin-bottom:12px;">
+
+    <div class="card">
+      <div class="chard">H1 Carry Forward — by Role &amp; Level</div>
+      <div class="tw" style="max-height:380px;">
+        <table class="role-tbl">
+          <thead><tr>
+            <th>Department</th>
+            <th style="text-align:left">Role Name</th>
+            <th style="text-align:left">Level</th>
+            <th style="text-align:left">Country</th>
+            <th style="text-align:left">BU</th>
+            <th style="text-align:left">Status</th>
+          </tr></thead>
+          <tbody id="t4spill"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="chard">Level by Wing <small>top 6 · horizontal stacked</small></div>
+      <div class="ch ch-380"><canvas id="c4winglvl"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- ROW 3: Business Driver Split (left) | Country by Wing (right) -->
+  <div class="row col-2" style="align-items:start;margin-bottom:0;">
+
+    <div class="card">
+      <div class="chard">Business Driver Split</div>
+      <div class="ch ch-300"><canvas id="c4bdriver"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="chard">Country by Wing <small>top 6 · horizontal stacked</small></div>
+      <div class="ch ch-300"><canvas id="c4wingctr"></canvas></div>
+    </div>
+
+  </div>
+
+</div><!-- /p4 -->
 
 </div><!-- /content -->
 
@@ -307,7 +611,8 @@ tbody tr:hover td{background:rgba(76,110,245,.04);}
   <span class="footer-l">NEXT Ventures Group · H2 FY2026 Manpower Planning · Confidential — HR People & Culture</span>
   <span class="footer-r" id="fstat"></span>
 </div>
-</div>
+
+</div><!-- /shell -->
 
 <script>
 const RAW = {"employees": [{"dept": "Management", "wing": "Core", "country": "Malaysia", "emp_type": "FTE", "grade": "M11", "designation": "Chief Executive Officer"}, {"dept": "Management", "wing": "Core", "country": "Malaysia", "emp_type": "FTE", "grade": "M11", "designation": "Chief Strategy Officer"}, {"dept": "Payments & Treasury", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M8", "designation": "Senior Vice President"}, {"dept": "CEO's Office", "wing": "Core", "country": "Malaysia", "emp_type": "FTE", "grade": "M9", "designation": "Chief of Staff"}, {"dept": "Technology", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "Operations", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "Trading & Risk Operations", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "Marketing", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "Product", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M6", "designation": "Director"}, {"dept": "Vice President", "wing": "Core", "country": "Sri Lanka", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "CEO's Office", "wing": "Project Management Office", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Trading & Risk Management", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M6", "designation": "Director"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Payments & Treasury", "wing": "Revenue Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Admin Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "CQC", "country": "Sri Lanka", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Operations", "wing": "Risk Monitoring & Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Payments & Treasury", "wing": "Payment Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Payments & Treasury", "wing": "General Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "IT", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Community Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Client Experience", "wing": "CQC", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Operations - FN", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "CEO's Office", "wing": "Strategic Coordination", "country": "Malaysia", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Admin Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "DevOps", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Product", "wing": "Product Design", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Bangladesh", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "CEO's Office", "wing": "Strategic Execution Lead", "country": "Malaysia", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Sri Lanka Operations", "wing": "Operations", "country": "Sri Lanka", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Admin Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "WFM Specialist", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Product", "wing": "Product Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Finance & Audit", "wing": "Finance", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Technology", "wing": "IT", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "AI & Automation", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Sales & Account Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Operations - FN", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Compliance - ACCA", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Payment Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "HRBP", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Copywriting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Payments & Treasury", "wing": "Payment Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Business Development", "wing": "Case Resolution - FNmarkets", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Payments & Treasury", "wing": "Payments Research & Development", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "AI & Automation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Operations - FN", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Payments & Treasury", "wing": "General Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Client Experience", "wing": "CQC", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Sales & Account Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Product", "wing": "Product Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Payments & Treasury", "wing": "Payment Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Core", "country": "Bangladesh", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Finance & Audit", "wing": "Internal Audit", "country": "Bangladesh", "emp_type": "FTE", "grade": "M2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "CQC", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Finance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Product", "wing": "Product Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "SQA", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Finance & Audit", "wing": "Accounts", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "CQC", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "AI & Automation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "PSTF", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Analytics & MarTech", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Technology", "wing": "SQA", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Accounts", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Product", "wing": "Product Management - FNmarkets", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Office of Project Management", "wing": "Business Operations - OPM", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Community Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Business Development", "wing": "Case Resolution - FNmarkets", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Finance & Audit", "wing": "Internal Audit", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Operations", "wing": "Platform", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Product", "wing": "Product Design", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Back Office - FundedNext", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Treasury Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Payments Research & Development", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Revenue Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Product", "wing": "Product Design", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Technology", "wing": "Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "AI & Automation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Payments & Treasury", "wing": "Revenue Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Community Management", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "IT", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Community Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "SQA", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "SEO", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Community & Partner Management", "wing": "Community Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Reputation Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Payments & Treasury", "wing": "Payment Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "Talent Acquisition", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Platform Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Admin Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Analytics & MarTech", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "DevOps", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "DevOps", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Email Marketing", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Reputation Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "IT", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "HRBP", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Revenue Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Finance & Audit", "wing": "Internal Audit", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Office of Project Management", "wing": "Business Operations - OPM", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Payments Research & Development", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Email Marketing", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Community Management", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Community & Partner Management", "wing": "Reputation Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "IT", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Reputation Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Community Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Reputation Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "HRBP", "country": "Sri Lanka", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Investigation", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "Talent Acquisition", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Content Writer", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Reporting & Analysis", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Revenue Assurance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Content Writer", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Copywriting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "IT", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Payment Ops", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Finance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Finance & Audit", "wing": "Revenue Assurance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Product", "wing": "Business Intelligence - FNmarkets", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "Talent Acquisition", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC2", "designation": "Specialist"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting - NEXT Lanka", "country": "Sri Lanka", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Product", "wing": "Product Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Frontend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Operations", "wing": "Risk Monitoring & Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Admin Operations", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Trading & Risk Operations", "wing": "Platform", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Finance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Technical Support", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "SQA", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Technical Support", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Product", "wing": "Product Design", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "SEO", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Sales & Account Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Sales & Account Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Sales & Account Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Product", "wing": "Product Design", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Internal Audit", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Sales & Account Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "CQC", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "SQA", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Reputation Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Payment Ops", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Risk Monitoring & Data", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Management", "wing": "Client Support", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "SQA", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Internal Audit", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Internal Audit", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Finance & Audit", "wing": "Finance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Malaysia", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "CQC", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "SQA", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Technology", "wing": "Cyber Security", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Marketing", "wing": "Social Media Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "Talent Acquisition", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "External Affairs", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Technology", "wing": "Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Internal Audit", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "External Affairs", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Business Development", "wing": "Business Development", "country": "Malaysia", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Finance & Audit", "wing": "Regulatory Reporting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Partner Management", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Mobile App", "country": "Bangladesh", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "People & Culture", "wing": "People Experience", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "Mobile App", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Mobile App", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Admin Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Pro Solution Task Force (PSTF)", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Copywriting", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Community Management", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Business Operations", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "Core", "country": "Malaysia", "emp_type": "FTE", "grade": "M10", "designation": "Chief People Officer"}, {"dept": "People & Culture", "wing": "HRBP", "country": "Malaysia", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "People & Culture", "wing": "Talent Acquisition", "country": "Malaysia", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Product", "wing": "Core", "country": "Malaysia", "emp_type": "FTE", "grade": "M6", "designation": "Director"}, {"dept": "Product", "wing": "Product Design", "country": "Malaysia", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Finance & Audit", "wing": "Internal Audit", "country": "Bangladesh", "emp_type": "FTE", "grade": "M3", "designation": "Manager I"}, {"dept": "Technology", "wing": "Cyber Security", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "IT", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Admin Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Cyber Security", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Case Resolution", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Email Marketing", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Global Accounting - NEXT Lanka", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Community & Partner Management", "wing": "Reputation Management", "country": "Bangladesh", "emp_type": "Virtual Executive", "grade": "VE", "designation": "Virtual Executive"}, {"dept": "Marketing", "wing": "Copywriting", "country": "Malaysia", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Operations", "wing": "Dealing Desk", "country": "Cyprus", "emp_type": "FTE", "grade": "M6", "designation": "Director"}, {"dept": "Admin, Compliance & Corporate Affairs", "wing": "Admin Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "Trainee", "designation": "Jr. Executive"}, {"dept": "Technology", "wing": "AI", "country": "Bangladesh", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Legal & Compliance", "wing": "Core", "country": "Malaysia", "emp_type": "FTE", "grade": "M10", "designation": "Chief Legal Officer"}, {"dept": "Technology", "wing": "Technical Support", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "HRBP", "country": "Malaysia", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Product", "wing": "Core", "country": "Malaysia", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Email", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Technology", "wing": "Technical Support", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "HRBP", "country": "Malaysia", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Technology", "wing": "SQA", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Technology", "wing": "DevOps", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Malaysia", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Live Chat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Product", "wing": "Product Design", "country": "Malaysia", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Finance & Audit", "wing": "Finance", "country": "Malaysia", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "People & Culture", "wing": "Talent Acquisition", "country": "Malaysia", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "Marketing", "wing": "Brand & Creative", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Client Experience", "wing": "Livechat", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Operations", "wing": "Operations", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Payments & Treasury", "wing": "Payment Ops", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Marketing", "wing": "Media & Performance", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Trading & Risk Operations", "wing": "Risk Monitoring & Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Product", "wing": "Product Design", "country": "Malaysia", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Product", "wing": "Product Management - FNmarkets", "country": "Malaysia", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Product", "wing": "Product Management - FNmarkets", "country": "Malaysia", "emp_type": "FTE", "grade": "IC2", "designation": "Sr. Executive"}, {"dept": "People & Culture", "wing": "Talent Acquisition", "country": "UAE", "emp_type": "FTE", "grade": "M7", "designation": "Vice President"}, {"dept": "People & Culture", "wing": "Talent Acquisition", "country": "UAE", "emp_type": "FTE", "grade": "M5", "designation": "Associate Director"}, {"dept": "Payments & Treasury", "wing": "Revenue Operations", "country": "Sri Lanka", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "Business Intelligence", "wing": "Business Intelligence", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}, {"dept": "People & Culture", "wing": "Performance & Total Rewards", "country": "Malaysia", "emp_type": "FTE", "grade": "M4", "designation": "Manager II"}, {"dept": "Technology", "wing": "Data", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC3", "designation": "Specialist"}, {"dept": "Technology", "wing": "Backend", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC0", "designation": "Intern"}, {"dept": "Trading & Risk Operations", "wing": "—", "country": "Bangladesh", "emp_type": "FTE", "grade": "IC1", "designation": "Executive"}], "h2_requests": [{"dept": "Client Experience", "bu": "FundedNext", "wing": "Communications Quality Control", "role": "Communications Quality Control Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "New", "quarter": "Q3"}, {"dept": "Operations", "bu": "FNmarkets", "wing": "Operations", "role": "Operations Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FNmarkets", "wing": "Operations", "role": "Operations Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FNmarkets", "wing": "Operations", "role": "Operations Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FNmarkets", "wing": "Operations", "role": "Operations Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FNmarkets", "wing": "Operations", "role": "Operations Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FundedNext", "wing": "Case Resolution", "role": "Case Resolution Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FundedNext", "wing": "Case Resolution", "role": "Case Resolution Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FundedNext", "wing": "Case Resolution", "role": "Case Resolution Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FundedNext", "wing": "Case Resolution", "role": "Case Resolution Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Operations", "bu": "FundedNext", "wing": "Case Resolution", "role": "Case Resolution Specialist", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Reputation Management", "role": "Reputation Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Reputation Management", "role": "Reputation Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Squad scaling", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Reputation Management", "role": "PR & Communications Executive", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Squad scaling", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Community Management", "role": "Social & Community Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Community Management", "role": "Social & Community Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Community Management", "role": "Social & Community Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Community Management", "role": "Social & Community Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Community Management", "role": "Social & Community Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Partner Management", "role": "Partner Acquistion Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "BD/MY", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Partner Management", "role": "Partner Acquistion Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "BD/MY", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Partner Management", "role": "Partner Acquistion Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "BD/MY", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Community & Partner Management", "bu": "FundedNext", "wing": "Partner Management", "role": "Partner Relationship Manager", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "BD/MY", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "Shared Services", "wing": "Brand & Creative", "role": "Motion Designer", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "Shared Services", "wing": "Brand & Creative", "role": "Motion Designer", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "Shared Services", "wing": "Brand & Creative", "role": "Motion Designer", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "Shared Services", "wing": "Brand & Creative", "role": "Motion Designer", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "Shared Services", "wing": "Brand & Creative", "role": "Motion Designer", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "FundedNext", "wing": "Media & Performance", "role": "Media Planner", "level": "M4 - Manager II", "level_short": "M4", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "FundedNext", "wing": "Brand & Creative", "role": "Product Marketing Manager", "level": "M4 - Manager II", "level_short": "M4", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "FNmarkets", "wing": "Brand & Creative", "role": "Product Marketing Manager", "level": "M4 - Manager II", "level_short": "M4", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Marketing", "bu": "Shared Services", "wing": "Media & Performance", "role": "Growth Marketing Manager", "level": "M4 - Manager II", "level_short": "M4", "priority": "Medium", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q3"}, {"dept": "Business Intelligence", "bu": "FNmarkets", "wing": "Business Intelligence", "role": "Business Intelliegence Executive", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Capability gap", "quarter": "Q3"}, {"dept": "Business Intelligence", "bu": "FundedNext", "wing": "Business Intelligence", "role": "Business Intelliegence Executive", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Capability gap", "quarter": "Q3"}, {"dept": "Business Intelligence", "bu": "FundedNext", "wing": "Business Intelligence", "role": "Business Intelliegence Executive", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Capability gap", "quarter": "Q3"}, {"dept": "Technology", "bu": "Shared Services", "wing": "Cyber Security", "role": "Security Engineer", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Technology", "bu": "Shared Services", "wing": "SQA", "role": "Senior Software Quality Assurance Engineer", "level": "M3 - Lead/ Manager I", "level_short": "M3", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Squad scaling", "quarter": "Q3"}, {"dept": "Technology", "bu": "Shared Services", "wing": "Technical Support", "role": "IT Operations Specialist (NOC & SOC)", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Capability gap", "quarter": "Q3"}, {"dept": "Technology", "bu": "Shared Services", "wing": "SQA", "role": "Software Quality Assurance Engineer", "level": "IC2 - Senior Executive", "level_short": "IC2", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Squad scaling", "quarter": "Q3"}, {"dept": "Technology", "bu": "Shared Services", "wing": "AI", "role": "Full Stack Systems Engineer (AI Native)", "level": "IC2 - Senior Executive", "level_short": "IC2", "priority": "Medium", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Technology", "bu": "FundedNext", "wing": "Frontend", "role": "Software Engineer Specialist(Full stack but expert in Frontend )", "level": "IC3 - Specialist", "level_short": "IC3", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Squad scaling", "quarter": "Q3"}, {"dept": "Technology", "bu": "FundedNext", "wing": "Frontend", "role": "Software Engineer Specialist(Full stack but expert in Frontend )", "level": "IC3 - Specialist", "level_short": "IC3", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Squad scaling", "quarter": "Q3"}, {"dept": "Technology", "bu": "FundedNext", "wing": "Frontend", "role": "Senior Software Engineer (Full stack but expert in FE )", "level": "M3 - Lead/ Manager I", "level_short": "M3", "priority": "Medium", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Capability gap", "quarter": "Q4"}, {"dept": "Technology", "bu": "FNmarkets", "wing": "Data", "role": "Data Engineer-I", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Technology", "bu": "Shared Services", "wing": "Data", "role": "Lead Data Engineer", "level": "M4 - Manager II", "level_short": "M4", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q3"}, {"dept": "Technology", "bu": "Shared Services", "wing": "Cyber Security", "role": "Cyber Security Lead", "level": "M5 - Associate Director", "level_short": "M5", "priority": "Medium", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q4"}, {"dept": "Technology", "bu": "FundedNext", "wing": "Frontend", "role": "Fullstack Frontend Lead", "level": "M4 - Manager II", "level_short": "M4", "priority": "Medium", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Capability gap", "quarter": "Q4"}, {"dept": "Technology", "bu": "Shared Services", "wing": "Data", "role": "Database Administrator", "level": "IC5 - Principal", "level_short": "IC5", "priority": "Medium", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Technology", "bu": "Shared Services", "wing": "Cyber Security", "role": "Firewall and Network Security (Cloudflare)", "level": "IC3 - Specialist", "level_short": "IC3", "priority": "Medium", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Technology", "bu": "Shared Services", "wing": "DevOps", "role": "Associated Director of Infrastructure", "level": "M5 - Associate Director", "level_short": "M5", "priority": "Medium", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Squad scaling", "quarter": "Q4"}, {"dept": "Technology", "bu": "Shared Services", "wing": "Technical Support", "role": "Project Coordinator", "level": "IC2 - Senior Executive", "level_short": "IC2", "priority": "Medium", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Technology", "bu": "Shared Services", "wing": "SQA", "role": "Trading Platform SQA Lead", "level": "M4 - Manager II", "level_short": "M4", "priority": "Medium", "country": "Dubai", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Technology", "bu": "Shared Services", "wing": "DevOps", "role": "Trading Platform Software Architect/Head of Tech/CTO", "level": "M7 - Vice President", "level_short": "M7", "priority": "Medium", "country": "Dubai", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Finance & Audit", "bu": "FundedNext", "wing": "Revenue Assurance", "role": "Revenue Assurance Executive", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Finance & Audit", "bu": "Shared Services", "wing": "Payables", "role": "Accounts Payable Executive", "level": "IC1 - Executive", "level_short": "IC1", "priority": "Critical", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "Head of Compliance / MLRO", "level": "M6 - Director", "level_short": "M6", "priority": "Critical", "country": "United Arab Emirates", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "AML Shift Lead — Morning (EU Experienced)", "level": "M3 - Lead/ Manager I", "level_short": "M3", "priority": "High", "country": "Cyprus", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "AML Analyst — Morning (Junior)", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Cyprus", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "AML Analyst — Morning (Junior)", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Cyprus", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "AML Analyst — Night #1 (Junior)", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Cyprus", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "E-Comms Surveillance Specialist (EU Experienced)", "level": "M3 - Lead/ Manager I", "level_short": "M3", "priority": "High", "country": "Cyprus", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "E-Comms Surveillance Specialist (EU Experienced)", "level": "M3 - Lead/ Manager I", "level_short": "M3", "priority": "High", "country": "Cyprus", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q4"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "Lawyer — FundedNext (Dedicated Entity Counsel)", "level": "IC3 - Specialist", "level_short": "IC3", "priority": "Medium", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Capability gap", "quarter": "Q3"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "Lawyer — FNmarkets (Dedicated Entity Counsel)", "level": "IC3 - Specialist", "level_short": "IC3", "priority": "Medium", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Capability gap", "quarter": "Q3"}, {"dept": "Legal & Compliance", "bu": "FNmarkets", "wing": "Legal & Compliance", "role": "Data Protection Officer (DPO)", "level": "IC4 - Expert", "level_short": "IC4", "priority": "Medium", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "New initiative", "quarter": "Q3"}, {"dept": "Product", "bu": "FundedNext", "wing": "Product Management", "role": "Product Manager, Trader Success Sqaud", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Attrition replacement", "quarter": "Q3"}, {"dept": "Product", "bu": "FundedNext", "wing": "Product Management", "role": "Product Manager, Futures Trading Rules, Risks", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Malaysia", "positions": 1.0, "status": "Submitted", "business_driver": "Squad scaling", "quarter": "Q3"}, {"dept": "Trading & Risk Operations", "bu": "FNmarkets", "wing": "Risk Monitoring & Data", "role": "Executive - Trading & Risk Operations", "level": "IC1 - Executive", "level_short": "IC1", "priority": "High", "country": "Bangladesh", "positions": 1.0, "status": "Submitted", "business_driver": "Risk & Compliance Coverage", "quarter": "Q3"}], "spillovers": [{"dept": "Trading & Risk Management", "country": "Srilanka", "bu": "FundedNext", "role_name": "Executive - Risk & Fraud Management", "level": "IC1", "status": "In Progress", "roles": 1.0}, {"dept": "Trading & Risk Management", "country": "Srilanka", "bu": "FundedNext", "role_name": "Executive - Risk & Fraud Management", "level": "IC1", "status": "In Progress", "roles": 1.0}, {"dept": "Commercial & Partnerships", "country": "UAE", "bu": "FN Group", "role_name": "Head of Commercial", "level": "M7", "status": "Offer stage", "roles": 1.0}, {"dept": "Marketing", "country": "Malaysia", "bu": "FundedNext", "role_name": "Senior Executive – Analytics & MarTech", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Community & Partner Management", "country": "Malaysia", "bu": "FundedNext", "role_name": "Influencer Partnership Onboarding & Negotiation Specialist", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Marketing", "country": "Bangladesh", "bu": "FN Group", "role_name": "Motion Designer", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Marketing", "country": "Bangladesh", "bu": "FundedNext", "role_name": "Lead SEO & Web Intelligence", "level": "M4", "status": "In Progress", "roles": 1.0}, {"dept": "Product", "country": "Malaysia", "bu": "FN Group", "role_name": "Chief Product Officer", "level": "M10", "status": "In Progress", "roles": 1.0}, {"dept": "Trading & Risk Operations", "country": "Bangladesh", "bu": "FN Group", "role_name": "Senior Dealer", "level": "IC2", "status": "Offer stage", "roles": 1.0}, {"dept": "Marketing", "country": "Malaysia", "bu": "FundedNext", "role_name": "Senior Executive/ Executive – Media & Strategy", "level": "IC2", "status": "Offer stage", "roles": 1.0}, {"dept": "Marketing", "country": "Malaysia", "bu": "FundedNext", "role_name": "Media Buying - Specialist", "level": "IC3", "status": "Offer stage", "roles": 1.0}, {"dept": "Payments & Treasury", "country": "Bangladesh", "bu": "FN Group", "role_name": "Executive - Revenue Operations -FN", "level": "IC1", "status": "Offer stage", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Trading Platform Engineer", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Product", "country": "Malaysia", "bu": "FN.com", "role_name": "Product Manager (Trading)", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Product", "country": "Malaysia", "bu": "FundedNext", "role_name": "Product Manager — Partnerships & Distribution", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Product", "country": "Malaysia", "bu": "FundedNext", "role_name": "Product Manager — Trading Platform, Rules & Risk", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Product", "country": "Malaysia", "bu": "FN.com", "role_name": "Product Manager- Operational Execellence", "level": "IC3", "status": "Offer stage", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN.com", "role_name": "Full Stack Engineering Lead (Brokerage Industry )", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FundedNext", "role_name": "AI Native Software Engineer (Payment industry)", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Product", "country": "Malaysia", "bu": "FundedNext", "role_name": "Product Analytics Lead", "level": "M3", "status": "Offer stage", "roles": 1.0}, {"dept": "Legal & Compliance", "country": "UAE", "bu": "FN Group", "role_name": "Compliance Officer (DFSA)/Head of Compliance", "level": "M7", "status": "In Progress", "roles": 1.0}, {"dept": "Product & BI", "country": "Malaysia", "bu": "FN Group", "role_name": "Product Design Manager", "level": "M4", "status": "In Progress", "roles": 1.0}, {"dept": "Product & BI", "country": "Malaysia", "bu": "FN Group", "role_name": "Senior Product Designer", "level": "IC4", "status": "Offer stage", "roles": 1.0}, {"dept": "Product & BI", "country": "Malaysia", "bu": "FN Group", "role_name": "Senior Product Designer", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Product & BI", "country": "Malaysia", "bu": "FN Group", "role_name": "Senior Product Designer", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Bangladesh", "bu": "FN Group", "role_name": "Applied AI Engineer", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Bangladesh", "bu": "FN Group", "role_name": "Applied AI Engineer", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Marketing", "country": "Malaysia", "bu": "FN Group", "role_name": "Product Marketing Manager", "level": "M5", "status": "In Progress", "roles": 1.0}, {"dept": "Marketing", "country": "Malaysia", "bu": "FN Group", "role_name": "Head of Brands and Communication", "level": "M7", "status": "In Progress", "roles": 1.0}, {"dept": "Trading & Risk Management", "country": "Malaysia", "bu": "FundedNext", "role_name": "Head of Risk", "level": "M7", "status": "Offer stage", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Head of Applied AI", "level": "M7", "status": "In Progress", "roles": 1.0}, {"dept": "Legal & Compliance", "country": "Malaysia", "bu": "FN Group", "role_name": "Legal Advisor", "level": "undecided", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FundedNext", "role_name": "Software Engineer, Traders Experience (AI-Native)", "level": "M5", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Software Engineer, Trading Platform (AI-Native)", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Software Engineer, Trading Platform (AI-Native)", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "People & Culture", "country": "UAE", "bu": "FN Group", "role_name": "HR Admin Specialist", "level": "M3", "status": "In Progress", "roles": 1.0}, {"dept": "People & Culture", "country": "Malaysia", "bu": "FN Group", "role_name": "Performance Specialist", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN.com", "role_name": "Full Stack Developer Lead (AI - Partner Experience)", "level": "M5", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FundedNext", "role_name": "Full Stack Developer Lead (AI - Partner Experience)", "level": "M5", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FundedNext", "role_name": "Full Stack Developer (AI Affiliate Platform)", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN.com", "role_name": "Full Stack Developer (AI Affiliate Platform)", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Bangladesh", "bu": "FundedNext", "role_name": "SQA Engineer", "level": "IC1", "status": "Offer stage", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "DevSecOps Engineer", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Database Reliability Engineer", "level": "IC2", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Senior / TL SRE", "level": "M4", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Full Stack Developer Lead (AI Payment Industry)", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Full Stack Developer Lead (AI Payment Industry)", "level": "IC3", "status": "In Progress", "roles": 1.0}, {"dept": "Technology", "country": "Malaysia", "bu": "FN Group", "role_name": "Chief Technology Officer", "level": "M10", "status": "In Progress", "roles": 1.0}, {"dept": "Client Experience", "country": "Srilanka", "bu": "FN Group", "role_name": "Global Head of Client Experience", "level": "M7", "status": "Offer stage", "roles": 1.0}], "bu_dept_map": {"FundedNext": ["Business Intelligence", "Client Experience", "Community & Partner Management", "Finance & Audit", "Marketing", "Operations", "Product", "Technology"], "FNmarkets": ["Business Intelligence", "Legal & Compliance", "Marketing", "Operations", "Technology", "Trading & Risk Operations"], "Shared Services": ["Finance & Audit", "Marketing", "Technology"]}, "dept_wing_map": {"Client Experience": ["Communications Quality Control", "Live Chat"], "Operations": ["Case Resolution", "Operations"], "Community & Partner Management": ["Community Management", "Partner Management", "Reputation Management"], "Marketing": ["Brand & Creative", "Media & Performance"], "Business Intelligence": ["Business Intelligence"], "Technology": ["AI", "Cyber Security", "Data", "DevOps", "Frontend", "SQA", "Technical Support"], "Finance & Audit": ["Payables", "Revenue Assurance"], "Legal & Compliance": ["Legal & Compliance"], "Product": ["Product Management"], "Trading & Risk Operations": ["Risk Monitoring & Data"]}}
@@ -324,10 +629,14 @@ const GC='rgba(26,34,53,.9)';
 const charts={};
 
 const allLevels=[
+  ['IC0','IC0 — Intern'],
   ['IC1','IC1 — Executive'],['IC2','IC2 — Sr. Executive'],['IC3','IC3 — Specialist'],
-  ['IC4','IC4 — Expert'],['IC5','IC5 — Principal'],['M3','M3 — Lead / Manager I'],
+  ['IC4','IC4 — Expert'],['IC5','IC5 — Principal'],
+  ['M2','M2 — Sr. Executive (Mgmt)'],['M3','M3 — Lead / Manager I'],
   ['M4','M4 — Manager II'],['M5','M5 — Associate Director'],['M6','M6 — Director'],
-  ['M7','M7 — Vice President'],['M10','M10'],['M11','M11'],
+  ['M7','M7 — Vice President'],['M8','M8 — Sr. Vice President'],
+  ['M9','M9 — Chief of Staff'],['M10','M10 — C-Suite'],['M11','M11 — C-Suite Sr.'],
+  ['VE','VE — Virtual Executive'],['Trainee','Trainee'],
 ];
 const levelOrder=allLevels.map(([c])=>c);
 
@@ -394,7 +703,13 @@ function toggleMSD(id){
   // close all
   document.querySelectorAll('.msd-panel.open').forEach(p=>p.classList.remove('open'));
   document.querySelectorAll('.msd-btn.open').forEach(b=>b.classList.remove('open'));
-  if(!isOpen){panel.classList.add('open');btn.classList.add('open');}
+  if(!isOpen){
+    const r=btn.getBoundingClientRect();
+    panel.style.top=(r.bottom+4)+'px';
+    panel.style.left=r.left+'px';
+    panel.classList.add('open');
+    btn.classList.add('open');
+  }
 }
 function closeMSD(id){
   document.querySelector(`#${id} .msd-panel`).classList.remove('open');
@@ -569,13 +884,13 @@ function mk(id,type,data,opts={}){
   const dlCfg=isBar
     ?{display:true,color:'rgba(221,225,237,0.9)',font:{size:isGrouped?8:9,weight:'700'},formatter:v=>v>0?v:'',anchor:'end',align:isHorizontal?'right':'top',offset:2,clamp:true,textShadowBlur:4,textShadowColor:'rgba(0,0,0,0.6)'}
     :{display:false};
-  const layoutPad=isBar?(isHorizontal?{right:28}:{top:20}):{};
+  const layoutPad=isBar?(isHorizontal?{right:32}:{top:24}):{};
   const basePlugins={legend:{display:false},...(opts.plugins||{})};
   const mergedOpts={responsive:true,maintainAspectRatio:false,...opts,layout:{padding:layoutPad,...(opts.layout||{})},plugins:{...basePlugins,datalabels:dlCfg}};
   charts[id]=new Chart(c,{type,data,options:mergedOpts});
 }
 const xG={grid:{color:GC},ticks:{color:'#4d5a78'}};
-const yG={grid:{color:GC},ticks:{color:'#4d5a78'}};
+const yG={grid:{color:GC},ticks:{color:'#4d5a78'},grace:'15%'};
 const nG={grid:{display:false},ticks:{color:'#4d5a78'}};
 function priPill(p){const cls=p==='Critical'?'r':p==='High'?'a':p==='Medium'?'p':'b';return `<span class="pill ${cls}">${p}</span>`;}
 function statusPill(st){const cls=st==='In Progress'?'a':'t';return `<span class="pill ${cls}">${st}</span>`;}
@@ -583,6 +898,9 @@ function statusPill(st){const cls=st==='In Progress'?'a':'t';return `<span class
 // ── RENDER ──
 function render(){
   const{emps,h2,spill}=filtered();
+  // ── Shared colour maps (defined once, used across all pages) ──
+  const ctrColors={'Bangladesh':'rgba(76,110,245,.85)','Malaysia':'rgba(6,182,212,.85)','Cyprus':'rgba(16,185,129,.85)','Sri Lanka':'rgba(245,158,11,.85)','United Arab Emirates':'rgba(239,68,68,.85)','UAE':'rgba(239,68,68,.85)','Dubai':'rgba(236,72,153,.85)','BD/MY':'rgba(132,204,22,.85)','Singapore':'rgba(249,115,22,.85)'};
+  const lvlColors={'IC1':'rgba(76,110,245,.85)','IC2':'rgba(124,58,237,.85)','IC3':'rgba(6,182,212,.85)','IC4':'rgba(16,185,129,.85)','IC5':'rgba(245,158,11,.85)','M3':'rgba(239,68,68,.85)','M4':'rgba(236,72,153,.85)','M5':'rgba(132,204,22,.85)','M6':'rgba(249,115,22,.85)','M7':'rgba(167,139,250,.85)'};
   const hcFTE=emps.filter(e=>e.emp_type==='FTE').length;
   const hcVE=emps.filter(e=>e.emp_type==='Virtual Executive').length;
   const hcTotal=emps.length;
@@ -654,6 +972,51 @@ function render(){
   const h2LvlMap=h2q.reduce((a,r)=>{const k=r.level_short||'?';a[k]=(a[k]||0)+r.positions;return a;},{});
   const h2LvlE=levelOrder.map(c=>[c,h2LvlMap[c]||0]).filter(([,v])=>v>0);
   mk('c1level','bar',{labels:h2LvlE.map(([c])=>c),datasets:[{data:h2LvlE.map(([,v])=>v),backgroundColor:h2LvlE.map((_,i)=>P[i%P.length]+'cc'),borderRadius:3,borderSkipped:false}]},{scales:{x:nG,y:{...yG,beginAtZero:true}},maintainAspectRatio:false});
+  // P1 country charts
+  const allCtrsH2=[...new Set(h2q.map(r=>r.country))].sort();
+  const ctrE=allCtrsH2.map(c=>[c,h2q.filter(r=>r.country===c).reduce((a,r)=>a+r.positions,0)]).sort((a,b)=>b[1]-a[1]);
+  sv2('c1ctr-lbl',qLabel); sv2('c1ctrpri-lbl',qLabel);
+  mk('c1ctr','bar',{labels:ctrE.map(([c])=>c),datasets:[{data:ctrE.map(([,v])=>v),backgroundColor:ctrE.map(([c])=>ctrColors[c]||P[allCtrsH2.indexOf(c)%P.length]+'cc'),borderRadius:3,borderSkipped:false}]},{scales:{x:nG,y:{...yG,beginAtZero:true}},maintainAspectRatio:false});
+  // Country × Priority stacked
+  const priList=['Critical','High','Medium'];
+  const priClrs=['rgba(239,68,68,.85)','rgba(245,158,11,.85)','rgba(124,58,237,.85)'];
+  mk('c1ctrpri','bar',{labels:ctrE.map(([c])=>c),datasets:priList.map((pri,i)=>({label:pri,data:ctrE.map(([c])=>h2q.filter(r=>r.country===c&&r.priority===pri).reduce((a,r)=>a+r.positions,0)),backgroundColor:priClrs[i],borderRadius:2,borderSkipped:false}))},{plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:8,color:'#6b7a99',font:{size:9}}},datalabels:{display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=2,color:'#fff',font:{size:8,weight:'700'},formatter:v=>v,anchor:'center',align:'center'}},scales:{x:{...nG,stacked:true},y:{...yG,beginAtZero:true,stacked:true}},maintainAspectRatio:false});
+  // Country × Quarter
+  const qList=['Q3','Q4'];
+  const qClrs=['rgba(76,110,245,.85)','rgba(6,182,212,.85)'];
+  mk('c1ctrq','bar',{labels:ctrE.map(([c])=>c),datasets:qList.map((q,i)=>({label:q+' 2026',data:ctrE.map(([c])=>h2.filter(r=>r.country===c&&r.quarter===q).reduce((a,r)=>a+r.positions,0)),backgroundColor:qClrs[i],borderRadius:2,borderSkipped:false}))},{plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:8,color:'#6b7a99',font:{size:9}}},datalabels:{display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=1,color:'#fff',font:{size:8,weight:'700'},formatter:v=>v,anchor:'center',align:'center'}},scales:{x:{...nG,stacked:true},y:{...yG,beginAtZero:true,stacked:true}},maintainAspectRatio:false});
+  // Country × Level matrix (heatmap-style table)
+  const matrixCtrs=ctrE.map(([c])=>c).filter(c=>c&&c!=='?');
+  const matrixLvls=levelOrder.filter(l=>h2q.some(r=>r.level_short===l));
+  const matrixEl=document.getElementById('c1matrix');
+  if(matrixEl){
+    const total=h2q.reduce((a,r)=>a+r.positions,0)||1;
+    let html='<table class="matrix-tbl"><thead><tr><th></th>';
+    matrixCtrs.forEach(c=>{ html+=`<th title="${c}">${c.length>10?c.slice(0,9)+'…':c}</th>`; });
+    html+='<th>Total</th></tr></thead><tbody>';
+    matrixLvls.forEach(lvl=>{
+      html+=`<tr><td class="matrix-row-lbl">${lvl}</td>`;
+      let rowTot=0;
+      matrixCtrs.forEach(c=>{
+        const v=h2q.filter(r=>r.level_short===lvl&&r.country===c).reduce((a,r)=>a+r.positions,0);
+        rowTot+=v;
+        const intensity=v>0?Math.min(0.15+v*0.12,0.9):0;
+        const bg=v>0?`rgba(76,110,245,${intensity})`:'transparent';
+        html+=`<td style="background:${bg};color:${v>0?'#dde1ed':'#2d3a52'};font-weight:${v>0?'700':'400'}">${v||'—'}</td>`;
+      });
+      const rowInt=Math.min(0.1+rowTot*0.04,0.5);
+      html+=`<td style="background:rgba(76,110,245,${rowInt});color:#7a9af7;font-weight:700">${rowTot}</td></tr>`;
+    });
+    // Totals row
+    html+='<tr class="matrix-total-row"><td>Total</td>';
+    matrixCtrs.forEach(c=>{
+      const v=h2q.filter(r=>r.country===c).reduce((a,r)=>a+r.positions,0);
+      html+=`<td>${v}</td>`;
+    });
+    html+=`<td>${h2q.reduce((a,r)=>a+r.positions,0)}</td></tr>`;
+    html+='</tbody></table>';
+    matrixEl.innerHTML=html;
+  }
 
   // PAGE 2
   const t2=document.getElementById('t2spill');
@@ -669,15 +1032,21 @@ function render(){
   const spDMap=sm(spill,'dept','roles');
   const allD=[...new Set([...Object.keys(hcByDept),...Object.keys(h2DMap),...Object.keys(spDMap)])].sort((a,b)=>(hcByDept[b]||0)-(hcByDept[a]||0)).slice(0,20);
   mk('c3comp','bar',{labels:allD.map(d=>sh(d,18)),datasets:[{label:'Current HC',data:allD.map(d=>hcByDept[d]||0),backgroundColor:'rgba(76,110,245,.75)',borderRadius:3,borderSkipped:false},{label:'H2 Requests',data:allD.map(d=>h2DMap[d]||0),backgroundColor:'rgba(124,58,237,.75)',borderRadius:3,borderSkipped:false},{label:'H1 Carry Fwd',data:allD.map(d=>spDMap[d]||0),backgroundColor:'rgba(6,182,212,.65)',borderRadius:3,borderSkipped:false}]},{plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:12,color:'#6b7a99',font:{size:10}}}},scales:{x:nG,y:{...yG,beginAtZero:true}},maintainAspectRatio:false});
-  // Level-per-dept stacked bar (H2 requests)
-  const top8D=Object.entries(h2DMap).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([d])=>d);
-  const lvlColors={'IC1':'rgba(76,110,245,.8)','IC2':'rgba(124,58,237,.8)','IC3':'rgba(6,182,212,.8)','IC4':'rgba(16,185,129,.8)','IC5':'rgba(245,158,11,.8)','M3':'rgba(239,68,68,.8)','M4':'rgba(236,72,153,.8)','M5':'rgba(132,204,22,.8)','M6':'rgba(249,115,22,.8)','M7':'rgba(167,139,250,.8)'};
+  // Level-per-dept — horizontal stacked, top 6 depts, datalabels only on bars ≥2
+  const top6D=Object.entries(h2DMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([d])=>d);
   const lvlsPresent=[...new Set(h2.map(r=>r.level_short))].filter(l=>levelOrder.includes(l)).sort((a,b)=>levelOrder.indexOf(a)-levelOrder.indexOf(b));
-  mk('c3lvldept','bar',{labels:top8D.map(d=>sh(d,16)),datasets:lvlsPresent.map(lvl=>({label:lvl,data:top8D.map(d=>h2.filter(r=>r.dept===d&&r.level_short===lvl).reduce((a,r)=>a+r.positions,0)),backgroundColor:lvlColors[lvl]||'rgba(160,160,180,.7)',borderRadius:2,borderSkipped:false}))},{plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:8,color:'#6b7a99',font:{size:9}}}},scales:{x:{...nG,stacked:true},y:{...yG,beginAtZero:true,stacked:true}},maintainAspectRatio:false});
-  // HC level dist by dept (current)
-  const top8HC=Object.entries(hcByDept).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([d])=>d);
+  const stackedHorizOpts={indexAxis:'y',plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:6,color:'#6b7a99',font:{size:9}}},datalabels:{display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=2,color:'#fff',font:{size:8,weight:'700'},formatter:v=>v,anchor:'center',align:'center'}},scales:{x:{...xG,beginAtZero:true,stacked:true},y:{...nG,stacked:true}},maintainAspectRatio:false};
+  const stackedOpts=stackedHorizOpts;
+  mk('c3lvldept','bar',{labels:top6D.map(d=>sh(d,18)),datasets:lvlsPresent.map(lvl=>({label:lvl,data:top6D.map(d=>h2.filter(r=>r.dept===d&&r.level_short===lvl).reduce((a,r)=>a+r.positions,0)),backgroundColor:lvlColors[lvl]||'rgba(160,160,180,.7)',borderRadius:2,borderSkipped:false}))},stackedOpts);
+  // HC level dist — horizontal stacked, top 6 depts
+  const top6HC=Object.entries(hcByDept).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([d])=>d);
   const hcLvls=[...new Set(emps.map(e=>e.grade))].filter(l=>levelOrder.includes(l)).sort((a,b)=>levelOrder.indexOf(a)-levelOrder.indexOf(b));
-  mk('c3hclvl','bar',{labels:top8HC.map(d=>sh(d,16)),datasets:hcLvls.map(lvl=>({label:lvl,data:top8HC.map(d=>emps.filter(e=>e.dept===d&&e.grade===lvl).length),backgroundColor:lvlColors[lvl]||'rgba(160,160,180,.7)',borderRadius:2,borderSkipped:false}))},{plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:8,color:'#6b7a99',font:{size:9}}}},scales:{x:{...nG,stacked:true},y:{...yG,beginAtZero:true,stacked:true}},maintainAspectRatio:false});
+  mk('c3hclvl','bar',{labels:top6HC.map(d=>sh(d,18)),datasets:hcLvls.map(lvl=>({label:lvl,data:top6HC.map(d=>emps.filter(e=>e.dept===d&&e.grade===lvl).length),backgroundColor:lvlColors[lvl]||'rgba(160,160,180,.7)',borderRadius:2,borderSkipped:false}))},stackedOpts);
+  // P3 country-per-dept stacked (H2 requests)
+  const top6DForCtr=Object.entries(h2DMap).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([d])=>d);
+  const ctrsInH2=[...new Set(h2.map(r=>r.country))].sort((a,b)=>h2.filter(r=>r.country===b).length-h2.filter(r=>r.country===a).length);
+  const ctrStackOpts={indexAxis:'y',plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:6,color:'#6b7a99',font:{size:9}}},datalabels:{display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=2,color:'#fff',font:{size:8,weight:'700'},formatter:v=>v,anchor:'center',align:'center'}},scales:{x:{...xG,beginAtZero:true,stacked:true},y:{...nG,stacked:true}},maintainAspectRatio:false};
+  mk('c3ctrdept','bar',{labels:top6DForCtr.map(d=>sh(d,18)),datasets:ctrsInH2.map(c=>({label:c,data:top6DForCtr.map(d=>h2.filter(r=>r.dept===d&&r.country===c).reduce((a,r)=>a+r.positions,0)),backgroundColor:ctrColors[c]||P[ctrsInH2.indexOf(c)%P.length]+'cc',borderRadius:2,borderSkipped:false}))},ctrStackOpts);
   const t3=document.getElementById('t3dept');
   t3.innerHTML='';
   allD.forEach(dept=>{
@@ -700,19 +1069,22 @@ function render(){
   t4sp.innerHTML=spill.length?spill.map(r=>`<tr><td style="color:#9aa5bf">${sh(r.dept,20)}</td><td>${sh(r.role_name,28)}</td><td><span class="pill p">${r.level||'—'}</span></td><td>${r.country}</td><td>${r.bu}</td><td>${statusPill(r.status)}</td></tr>`).join(''):'<tr><td colspan="6" style="text-align:center;padding:16px;color:#4d5a78">No carry forward matches filters</td></tr>';
   const wingE=Object.entries(sm(h2,'wing','positions')).sort((a,b)=>b[1]-a[1]);
   mk('c4wing','bar',{labels:wingE.map(([w])=>sh(w,18)),datasets:[{data:wingE.map(([,v])=>v),backgroundColor:wingE.map((_,i)=>P[i%P.length]+'cc'),borderRadius:3,borderSkipped:false}]},{indexAxis:'y',scales:{x:{...xG,beginAtZero:true},y:nG},maintainAspectRatio:false});
-  // Business driver chart
+  // Business driver chart — horizontal bar (clearer at a glance)
   const bdMap=h2.reduce((a,r)=>{const k=r.business_driver||'Unknown';a[k]=(a[k]||0)+r.positions;return a;},{});
-  const bdColors={'Attrition replacement':'rgba(76,110,245,.8)','New initiative':'rgba(16,185,129,.8)','Squad scaling':'rgba(245,158,11,.8)','Capability gap':'rgba(124,58,237,.8)','Risk & Compliance Coverage':'rgba(6,182,212,.8)','New':'rgba(239,68,68,.8)'};
+  const bdColors={'Attrition replacement':'rgba(76,110,245,.85)','New initiative':'rgba(16,185,129,.85)','Squad scaling':'rgba(245,158,11,.85)','Capability gap':'rgba(124,58,237,.85)','Risk & Compliance Coverage':'rgba(6,182,212,.85)','New':'rgba(239,68,68,.85)'};
   const bdE=Object.entries(bdMap).sort((a,b)=>b[1]-a[1]);
-  mk('c4bdriver','doughnut',{
-    labels:bdE.map(([k])=>k),
-    datasets:[{data:bdE.map(([,v])=>v),backgroundColor:bdE.map(([k])=>bdColors[k]||'rgba(160,160,180,.6)'),borderWidth:0,hoverOffset:4}]
-  },{plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:8,padding:10,color:'#6b7a99',font:{size:9}}},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw}`}}},cutout:'55%',maintainAspectRatio:false});
+  mk('c4bdriver','bar',{
+    labels:bdE.map(([k])=>sh(k,28)),
+    datasets:[{data:bdE.map(([,v])=>v),backgroundColor:bdE.map(([k])=>bdColors[k]||'rgba(160,160,180,.7)'),borderRadius:4,borderSkipped:false}]
+  },{indexAxis:'y',scales:{x:{...xG,beginAtZero:true},y:nG},maintainAspectRatio:false});
   // Wing × Level stacked bar
   const top6Wings=Object.entries(sm(h2,'wing','positions')).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([w])=>w);
   const wingLvls=[...new Set(h2.map(r=>r.level_short))].filter(l=>levelOrder.includes(l)).sort((a,b)=>levelOrder.indexOf(a)-levelOrder.indexOf(b));
-  const wlColors={'IC1':'rgba(76,110,245,.8)','IC2':'rgba(124,58,237,.8)','IC3':'rgba(6,182,212,.8)','IC4':'rgba(16,185,129,.8)','IC5':'rgba(245,158,11,.8)','M3':'rgba(239,68,68,.8)','M4':'rgba(236,72,153,.8)','M5':'rgba(132,204,22,.8)','M6':'rgba(249,115,22,.8)','M7':'rgba(167,139,250,.8)'};
-  mk('c4winglvl','bar',{labels:top6Wings.map(w=>sh(w,16)),datasets:wingLvls.map(lvl=>({label:lvl,data:top6Wings.map(w=>h2.filter(r=>r.wing===w&&r.level_short===lvl).reduce((a,r)=>a+r.positions,0)),backgroundColor:wlColors[lvl]||'rgba(160,160,180,.7)',borderRadius:2,borderSkipped:false}))},{plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:8,color:'#6b7a99',font:{size:9}}}},scales:{x:{...nG,stacked:true},y:{...yG,beginAtZero:true,stacked:true}},maintainAspectRatio:false});
+  const wStackOpts={indexAxis:'y',plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,padding:6,color:'#6b7a99',font:{size:9}}},datalabels:{display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>=2,color:'#fff',font:{size:8,weight:'700'},formatter:v=>v,anchor:'center',align:'center'}},scales:{x:{...xG,beginAtZero:true,stacked:true},y:{...nG,stacked:true}},maintainAspectRatio:false};
+  mk('c4winglvl','bar',{labels:top6Wings.map(w=>sh(w,16)),datasets:wingLvls.map(lvl=>({label:lvl,data:top6Wings.map(w=>h2.filter(r=>r.wing===w&&r.level_short===lvl).reduce((a,r)=>a+r.positions,0)),backgroundColor:lvlColors[lvl]||'rgba(160,160,180,.7)',borderRadius:2,borderSkipped:false}))},wStackOpts);
+  // P4 country-per-wing stacked
+  const ctrsInWing=[...new Set(h2.map(r=>r.country))].sort((a,b)=>h2.filter(r=>r.country===b).length-h2.filter(r=>r.country===a).length);
+  mk('c4wingctr','bar',{labels:top6Wings.map(w=>sh(w,16)),datasets:ctrsInWing.map(c=>({label:c,data:top6Wings.map(w=>h2.filter(r=>r.wing===w&&r.country===c).reduce((a,r)=>a+r.positions,0)),backgroundColor:ctrColors[c]||P[ctrsInWing.indexOf(c)%P.length]+'cc',borderRadius:2,borderSkipped:false}))},wStackOpts);
 }
 
 let currentQFilter='all';
@@ -722,7 +1094,20 @@ function goTab(idx,btn){
   document.querySelectorAll('.navtab').forEach(b=>b.classList.remove('active'));
   document.getElementById(`p${idx}`).classList.add('active');
   btn.classList.add('active');
-  setTimeout(render,30);
+  // Render data immediately (tables, KPIs, etc.)
+  render();
+  // Double rAF: first frame switches visibility, second frame has real layout dims.
+  // This ensures full-width charts (col-1) get the correct container width.
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      Object.values(charts).forEach(ch=>{
+        try{
+          ch.resize();
+          ch.update('none');
+        }catch(e){}
+      });
+    });
+  });
 }
 function resetAll(){
   Object.keys(MSD).forEach(id=>{
@@ -738,6 +1123,7 @@ function resetAll(){
 }
 
 render();
+
 </script>
 </body>
 </html>
